@@ -3,37 +3,31 @@
 <!-- Header Start -->
 <div class="container-fluid bg-breadcrumb">
     <div class="container text-center py-5" style="max-width: 900px;">
-        <h4 class="text-white display-4 mb-4 wow fadeInDown" data-wow-delay="0.1s">About Us</h4>
-        <ol class="breadcrumb d-flex justify-content-center mb-0 wow fadeInDown" data-wow-delay="0.3s">
-            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-            <li class="breadcrumb-item"><a href="#">Pages</a></li>
-            <li class="breadcrumb-item active text-primary">About</li>
-        </ol>
+        <h4 class="text-white display-4 mb-4 wow fadeInDown" data-wow-delay="0.1s">Về Chúng Tôi</h4>
     </div>
 </div>
 <!-- Header End -->
 
 
 <!-- About Start -->
-<div class="container-fluid bg-light about py-5">
-    <div class="container py-5">
+<div class="container-fluid bg-light about pb-5">
+    <div class="container pb-5">
         <div class="row g-5">
             <div class="col-xl-6 wow fadeInLeft" data-wow-delay="0.2s">
                 <div class="about-item-content bg-white rounded p-5 h-100">
-                    <h4 class="text-primary">About Our Company</h4>
-                    <h1 class="display-4 mb-4">High Range of Exploring Protection</h1>
-                    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Sunt debitis sint tempora. Corporis
-                        consequatur illo blanditiis voluptates aperiam quos aliquam totam aliquid rem explicabo,
-                    </p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae praesentium recusandae
-                        eligendi modi hic
-                    </p>
-                    <p class="text-dark"><i class="fa fa-check text-primary me-3"></i>We can save your money.</p>
-                    <p class="text-dark"><i class="fa fa-check text-primary me-3"></i>Production or trading of good
-                    </p>
-                    <p class="text-dark mb-4"><i class="fa fa-check text-primary me-3"></i>Our life insurance is
-                        flexible</p>
-                    <a class="btn btn-primary rounded-pill py-3 px-5" href="#">More Information</a>
+                    <h4 class="text-primary">Về AcePlus</h4>
+                    <h1 class="display-4 mb-4">Trải Nghiệm Sân Cầu Lông Đẳng Cấp</h1>
+                    <p>AcePlus tự hào sở hữu hệ thống sân cầu lông đạt tiêu chuẩn, phục vụ tốt nhất cho nhu cầu luyện
+                        tập và thi đấu của bạn. Chúng tôi luôn nỗ lực mang đến trải nghiệm thể thao chuyên nghiệp, thoải
+                        mái và dễ dàng.</p>
+                    <p>Đặt sân trực tiếp trên website của chúng tôi để tận hưởng sự tiện lợi cùng nhiều ưu đãi hấp dẫn
+                        dành riêng cho khách hàng thân thiết.</p>
+                    <p class="text-dark"><i class="fa fa-check text-primary me-3"></i>Hệ thống sân đạt chuẩn chất lượng
+                        cao</p>
+                    <p class="text-dark"><i class="fa fa-check text-primary me-3"></i>Đặt sân nhanh chóng, tiện lợi</p>
+                    <p class="text-dark mb-4"><i class="fa fa-check text-primary me-3"></i>Dịch vụ hỗ trợ khách hàng tận
+                        tâm</p>
+                    <a class="btn btn-primary rounded-pill py-3 px-5" href="#">Xem Thêm</a>
                 </div>
             </div>
             <div class="col-xl-6 wow fadeInRight" data-wow-delay="0.2s">
@@ -41,43 +35,44 @@
                     <div class="row g-4 justify-content-center">
                         <div class="col-12">
                             <div class="rounded bg-light">
-                                <img src="layout/img/about-1.png" class="img-fluid rounded w-100" alt="">
+                                <img src="layout/img/cau-long-6.jpg" class="img-fluid rounded w-100"
+                                    alt="Sân cầu lông AcePlus">
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="counter-item bg-light rounded p-3 h-100">
                                 <div class="counter-counting">
-                                    <span class="text-primary fs-2 fw-bold" data-toggle="counter-up">129</span>
+                                    <span class="text-primary fs-2 fw-bold" data-toggle="counter-up">5</span>
                                     <span class="h1 fw-bold text-primary">+</span>
                                 </div>
-                                <h4 class="mb-0 text-dark">Insurance Policies</h4>
+                                <h4 class="mb-0 text-dark">Sân Chuẩn Quốc Tế</h4>
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="counter-item bg-light rounded p-3 h-100">
                                 <div class="counter-counting">
-                                    <span class="text-primary fs-2 fw-bold" data-toggle="counter-up">99</span>
+                                    <span class="text-primary fs-2 fw-bold" data-toggle="counter-up">1000</span>
                                     <span class="h1 fw-bold text-primary">+</span>
                                 </div>
-                                <h4 class="mb-0 text-dark">Awards WON</h4>
+                                <h4 class="mb-0 text-dark">Khách Hàng Hài Lòng</h4>
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="counter-item bg-light rounded p-3 h-100">
                                 <div class="counter-counting">
-                                    <span class="text-primary fs-2 fw-bold" data-toggle="counter-up">556</span>
+                                    <span class="text-primary fs-2 fw-bold" data-toggle="counter-up">15</span>
                                     <span class="h1 fw-bold text-primary">+</span>
                                 </div>
-                                <h4 class="mb-0 text-dark">Skilled Agents</h4>
+                                <h4 class="mb-0 text-dark">Năm Kinh Nghiệm</h4>
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="counter-item bg-light rounded p-3 h-100">
                                 <div class="counter-counting">
-                                    <span class="text-primary fs-2 fw-bold" data-toggle="counter-up">967</span>
+                                    <span class="text-primary fs-2 fw-bold" data-toggle="counter-up">50</span>
                                     <span class="h1 fw-bold text-primary">+</span>
                                 </div>
-                                <h4 class="mb-0 text-dark">Team Members</h4>
+                                <h4 class="mb-0 text-dark">Giải Đấu Tổ Chức</h4>
                             </div>
                         </div>
                     </div>
@@ -89,96 +84,119 @@
 <!-- About End -->
 
 
-<!-- Feature Start -->
-<div class="container-fluid feature bg-light pb-5">
-    <div class="container pb-5">
+<!-- Service Start -->
+<div class="container-fluid service py-5">
+    <div class="container py-5">
         <div class="text-center mx-auto pb-5 wow fadeInUp" data-wow-delay="0.2s" style="max-width: 800px;">
-            <h4 class="text-primary">Our Features</h4>
-            <h1 class="display-4 mb-4">Insurance Provide you a Better Future</h1>
-            <p class="mb-0">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Tenetur adipisci facilis
-                cupiditate recusandae aperiam temporibus corporis itaque quis facere, numquam, ad culpa deserunt
-                sint dolorem autem obcaecati, ipsam mollitia hic.
-            </p>
+            <h4 class="text-primary">Dịch Vụ Của Chúng Tôi</h4>
+            <h1 class="display-4 mb-4">Trải Nghiệm Dịch Vụ Đặt Sân Hàng Đầu</h1>
+            <p class="mb-0">Chúng tôi cung cấp các dịch vụ chất lượng cao để giúp bạn dễ dàng đặt sân, tận hưởng không
+                gian chơi cầu lông hiện đại và nhận được sự hỗ trợ tận tâm nhất.</p>
         </div>
-        <div class="row g-4">
+        <div class="row g-4 justify-content-center">
             <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp" data-wow-delay="0.2s">
-                <div class="feature-item p-4 pt-0">
-                    <div class="feature-icon p-4 mb-4">
-                        <i class="far fa-handshake fa-3x"></i>
+                <div class="service-item">
+                    <div class="service-img">
+                        <img src="layout/img/cau-long-7.png" class="img-fluid rounded-top w-100" alt="">
+                        <div class="service-icon p-3">
+                            <i class="fa fa-calendar-check fa-2x"></i>
+                        </div>
                     </div>
-                    <h4 class="mb-4">Trusted Company</h4>
-                    <p class="mb-4">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea hic laborum odit
-                        pariatur...
-                    </p>
-                    <a class="btn btn-primary rounded-pill py-2 px-4" href="#">Learn More</a>
+                    <div class="service-content p-4">
+                        <div class="service-content-inner">
+                            <a href="#" class="d-inline-block h4 mb-4">Hệ Thống Đặt Sân Trực Tuyến</a>
+                            <p class="mb-4">Đặt sân nhanh chóng và dễ dàng qua hệ thống trực tuyến mọi lúc, mọi nơi.</p>
+                            <a class="btn btn-primary rounded-pill py-2 px-4" href="#">Đặt Sân Ngay</a>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp" data-wow-delay="0.4s">
-                <div class="feature-item p-4 pt-0">
-                    <div class="feature-icon p-4 mb-4">
-                        <i class="fa fa-dollar-sign fa-3x"></i>
+                <div class="service-item">
+                    <div class="service-img">
+                        <img src="layout/img/san-cau-long.jpg" class="img-fluid rounded-top w-100" alt="">
+                        <div class="service-icon p-3">
+                            <i class="fa fa-table-tennis fa-2x"></i>
+
+                        </div>
                     </div>
-                    <h4 class="mb-4">Anytime Money Back</h4>
-                    <p class="mb-4">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea hic laborum odit
-                        pariatur...
-                    </p>
-                    <a class="btn btn-primary rounded-pill py-2 px-4" href="#">Learn More</a>
+                    <div class="service-content p-4">
+                        <div class="service-content-inner">
+                            <a href="#" class="d-inline-block h4 mb-4">Sân Đấu Chất Lượng Cao, Chuẩn Quốc Tế</a>
+                            <p class="mb-4">Trải nghiệm sân cầu lông đạt chuẩn với hệ thống chiếu sáng hiện đại.</p>
+                            <a class="btn btn-primary rounded-pill py-2 px-4" href="#">Đặt Sân Ngay</a>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp" data-wow-delay="0.6s">
-                <div class="feature-item p-4 pt-0">
-                    <div class="feature-icon p-4 mb-4">
-                        <i class="fa fa-bullseye fa-3x"></i>
+                <div class="service-item">
+                    <div class="service-img">
+                        <img src="layout/img/cskh.jpg" class="img-fluid rounded-top w-100" alt="">
+                        <div class="service-icon p-3">
+                            <i class="fa fa-users fa-2x"></i>
+                        </div>
                     </div>
-                    <h4 class="mb-4">Flexible Plans</h4>
-                    <p class="mb-4">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea hic laborum odit
-                        pariatur...
-                    </p>
-                    <a class="btn btn-primary rounded-pill py-2 px-4" href="#">Learn More</a>
+                    <div class="service-content p-4">
+                        <div class="service-content-inner">
+                            <a href="#" class="d-inline-block h4 mb-4">Hỗ Trợ Người Chơi Với Hệ Thống CSKH</a>
+                            <p class="mb-4">Đội ngũ nhân viên luôn sẵn sàng hỗ trợ mọi nhu cầu của bạn, hỗ
+                                trợ qua hotline và chatbox.</p>
+                            <a class="btn btn-primary rounded-pill py-2 px-4" href="#">Đặt Sân Ngay</a>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp" data-wow-delay="0.8s">
-                <div class="feature-item p-4 pt-0">
-                    <div class="feature-icon p-4 mb-4">
-                        <i class="fa fa-headphones fa-3x"></i>
+                <div class="service-item">
+                    <div class="service-img">
+                        <img src="layout/img/tien-ich.jpg" class="img-fluid rounded-top w-100" alt="">
+                        <div class="service-icon p-3">
+                            <i class="fa fa-couch fa-2x"></i>
+                        </div>
                     </div>
-                    <h4 class="mb-4">24/7 Fast Support</h4>
-                    <p class="mb-4">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea hic laborum odit
-                        pariatur...
-                    </p>
-                    <a class="btn btn-primary rounded-pill py-2 px-4" href="#">Learn More</a>
+                    <div class="service-content p-4">
+                        <div class="service-content-inner">
+                            <a href="#" class="d-inline-block h4 mb-4">Tiện Ích Kèm Theo Hiện Đại</a>
+                            <p class="mb-4">Mượn vợt miễn phí và các dịch vụ tiện ích đi kèm, thỏa mãn cuộc
+                                vui.</p>
+                            <a class="btn btn-primary rounded-pill py-2 px-4" href="#">Đặt Sân Ngay</a>
+                        </div>
+                    </div>
                 </div>
+            </div>
+            <div class="col-12 text-center wow fadeInUp" data-wow-delay="0.2s">
+                <a class="btn btn-primary rounded-pill py-3 px-5" href="#">Xem Tất Cả Dịch Vụ</a>
             </div>
         </div>
     </div>
 </div>
-<!-- Feature End -->
+<!-- Service End -->
+
 
 <!-- FAQs Start -->
-<div class="container-fluid faq-section bg-light pb-5">
-    <div class="container pb-5">
+<div class="container-fluid faq-section bg-light py-5">
+    <div class="container py-5">
         <div class="row g-5 align-items-center">
             <div class="col-xl-6 wow fadeInLeft" data-wow-delay="0.2s">
                 <div class="h-100">
                     <div class="mb-5">
-                        <h4 class="text-primary">Some Important FAQ's</h4>
-                        <h1 class="display-4 mb-0">Common Frequently Asked Questions</h1>
+                        <h4 class="text-primary">Các câu hỏi thường gặp</h4>
+                        <h1 class="display-4 mb-0">Những thắc mắc phổ biến</h1>
                     </div>
                     <div class="accordion" id="accordionExample">
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="headingOne">
                                 <button class="accordion-button border-0" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                    Q: What happens during Freshers' Week?
+                                    Hỏi: Làm thế nào để đăng ký tài khoản?
                                 </button>
                             </h2>
                             <div id="collapseOne" class="accordion-collapse collapse show active"
                                 aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                                 <div class="accordion-body rounded">
-                                    A: Leverage agile frameworks to provide a robust synopsis for high level
-                                    overviews. Iterative approaches to corporate strategy foster collaborative
-                                    thinking to further the overall value proposition. Organically grow the holistic
-                                    world view of disruptive innovation via workplace diversity and empowerment.
+                                    Trả lời: Để đăng ký tài khoản, bạn chỉ cần nhấp vào nút "Đăng ký" ở góc phải trên
+                                    cùng, điền thông tin cá nhân và xác nhận email.
                                 </div>
                             </div>
                         </div>
@@ -186,16 +204,14 @@
                             <h2 class="accordion-header" id="headingTwo">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                    Q: What is the transfer application process?
+                                    Hỏi: Làm thế nào để đặt sân?
                                 </button>
                             </h2>
                             <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
                                 data-bs-parent="#accordionExample">
                                 <div class="accordion-body">
-                                    A: Leverage agile frameworks to provide a robust synopsis for high level
-                                    overviews. Iterative approaches to corporate strategy foster collaborative
-                                    thinking to further the overall value proposition. Organically grow the holistic
-                                    world view of disruptive innovation via workplace diversity and empowerment.
+                                    Trả lời: Sau khi đăng nhập, bạn có thể vào mục "Đặt sân" để chọn sân, thời gian và
+                                    xác nhận thanh toán.
                                 </div>
                             </div>
                         </div>
@@ -203,16 +219,14 @@
                             <h2 class="accordion-header" id="headingThree">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                    Q: Why should I attend community college?
+                                    Hỏi: Chính sách đặt sân online như thế nào?
                                 </button>
                             </h2>
                             <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
                                 data-bs-parent="#accordionExample">
                                 <div class="accordion-body">
-                                    A: Leverage agile frameworks to provide a robust synopsis for high level
-                                    overviews. Iterative approaches to corporate strategy foster collaborative
-                                    thinking to further the overall value proposition. Organically grow the holistic
-                                    world view of disruptive innovation via workplace diversity and empowerment.
+                                    Trả lời: Bạn cần có một tài khoản được đăng ký từ website, sau đó là các thao tác
+                                    đơn giản như: chọn ngày đặt, chọn sân, chọn giờ sân và hình thức thanh toán
                                 </div>
                             </div>
                         </div>
@@ -220,30 +234,25 @@
                 </div>
             </div>
             <div class="col-xl-6 wow fadeInRight" data-wow-delay="0.4s">
-                <img src="layout/img/carousel-2.png" class="img-fluid w-100" alt="">
+                <img src="layout/img/faq.png" class="img-fluid w-100" alt="FAQs">
             </div>
         </div>
     </div>
 </div>
 <!-- FAQs End -->
 
-
 <!-- Team Start -->
-<div class="container-fluid team py-5">
-    <div class="container py-5">
+<div class="container-fluid team pb-5">
+    <div class="container pb-5">
         <div class="text-center mx-auto pb-5 wow fadeInUp" data-wow-delay="0.2s" style="max-width: 800px;">
-            <h4 class="text-primary">Our Team</h4>
-            <h1 class="display-4 mb-4">Meet Our Expert Team Members</h1>
-            <p class="mb-0">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Tenetur adipisci facilis
-                cupiditate recusandae aperiam temporibus corporis itaque quis facere, numquam, ad culpa deserunt
-                sint dolorem autem obcaecati, ipsam mollitia hic.
-            </p>
+            <h4 class="text-primary">Nhà sáng lập</h4>
+            <h1 class="display-4 mb-4">Thành Viên Xây Dựng AcePlus</h1>
         </div>
         <div class="row g-4">
-            <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp" data-wow-delay="0.2s">
+            <div class="col-md-6 col-lg-6 col-xl-6 wow fadeInUp" data-wow-delay="0.2s">
                 <div class="team-item">
                     <div class="team-img">
-                        <img src="layout/img/team-1.jpg" class="img-fluid rounded-top w-100" alt="">
+                        <img src="layout/img/profile-tran.jpg" class="img-fluid rounded-top w-100" alt="">
                         <div class="team-icon">
                             <a class="btn btn-primary btn-sm-square rounded-pill mb-2" href=""><i
                                     class="fab fa-facebook-f"></i></a>
@@ -256,12 +265,12 @@
                         </div>
                     </div>
                     <div class="team-title p-4">
-                        <h4 class="mb-0">David James</h4>
-                        <p class="mb-0">Profession</p>
+                        <h4 class="mb-0">Trần Lê Phương Trân</h4>
+                        <p class="mb-0">Nhà kinh doanh</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp" data-wow-delay="0.4s">
+            <div class="col-md-6 col-lg-6 col-xl-6 wow fadeInUp" data-wow-delay="0.4s">
                 <div class="team-item">
                     <div class="team-img">
                         <img src="layout/img/team-2.jpg" class="img-fluid rounded-top w-100" alt="">
@@ -277,57 +286,106 @@
                         </div>
                     </div>
                     <div class="team-title p-4">
-                        <h4 class="mb-0">David James</h4>
-                        <p class="mb-0">Profession</p>
+                        <h4 class="mb-0">Phạm Văn Quân</h4>
+                        <p class="mb-0">Nhà kinh doanh</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp" data-wow-delay="0.6s">
-                <div class="team-item">
-                    <div class="team-img">
-                        <img src="layout/img/team-3.jpg" class="img-fluid rounded-top w-100" alt="">
-                        <div class="team-icon">
-                            <a class="btn btn-primary btn-sm-square rounded-pill mb-2" href=""><i
-                                    class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-primary btn-sm-square rounded-pill mb-2" href=""><i
-                                    class="fab fa-twitter"></i></a>
-                            <a class="btn btn-primary btn-sm-square rounded-pill mb-2" href=""><i
-                                    class="fab fa-linkedin-in"></i></a>
-                            <a class="btn btn-primary btn-sm-square rounded-pill mb-0" href=""><i
-                                    class="fab fa-instagram"></i></a>
+
+        </div>
+    </div>
+</div>
+<!-- Team End -->
+
+<!-- Testimonial Start -->
+<div class="container-fluid testimonial pb-5">
+    <div class="container pb-5">
+        <div class="text-center mx-auto pb-5 wow fadeInUp" data-wow-delay="0.2s" style="max-width: 800px;">
+            <h4 class="text-primary">Phản hồi từ khách hàng</h4>
+            <h1 class="display-4 mb-4">Khách hàng nói gì về chúng tôi</h1>
+            <p class="mb-0">Cảm nhận chân thật từ những khách hàng đã trải nghiệm dịch vụ của chúng tôi, giúp bạn thêm
+                niềm tin và lựa chọn chính xác.</p>
+        </div>
+        <div class="owl-carousel testimonial-carousel wow fadeInUp" data-wow-delay="0.2s">
+            <div class="testimonial-item bg-light rounded">
+                <div class="row g-0">
+                    <div class="col-4 col-lg-4 col-xl-3">
+                        <div class="h-100">
+                            <img src="layout/img/minh-tu.jpg" class="img-fluid h-100 rounded" style="object-fit: cover;"
+                                alt="">
                         </div>
                     </div>
-                    <div class="team-title p-4">
-                        <h4 class="mb-0">David James</h4>
-                        <p class="mb-0">Profession</p>
+                    <div class="col-8 col-lg-8 col-xl-9">
+                        <div class="d-flex flex-column my-auto text-start p-4">
+                            <h4 class="text-dark mb-0">Chị Tú</h4>
+                            <p class="mb-3">Chủ doanh nghiệp</p>
+                            <div class="d-flex text-primary mb-3">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p class="mb-0">"Dịch vụ rất chuyên nghiệp và đội ngũ hỗ trợ tận tình. Tôi hoàn toàn hài
+                                lòng và chắc chắn sẽ quay lại."</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp" data-wow-delay="0.8s">
-                <div class="team-item">
-                    <div class="team-img">
-                        <img src="layout/img/team-4.jpg" class="img-fluid rounded-top w-100" alt="">
-                        <div class="team-icon">
-                            <a class="btn btn-primary btn-sm-square rounded-pill mb-2" href=""><i
-                                    class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-primary btn-sm-square rounded-pill mb-2" href=""><i
-                                    class="fab fa-twitter"></i></a>
-                            <a class="btn btn-primary btn-sm-square rounded-pill mb-2" href=""><i
-                                    class="fab fa-linkedin-in"></i></a>
-                            <a class="btn btn-primary btn-sm-square rounded-pill mb-0" href=""><i
-                                    class="fab fa-instagram"></i></a>
+            <div class="testimonial-item bg-light rounded">
+                <div class="row g-0">
+                    <div class="col-4 col-lg-4 col-xl-3">
+                        <div class="h-100">
+                            <img src="layout/img/do-mixi.png" class="img-fluid h-100 rounded" style="object-fit: cover;"
+                                alt="">
                         </div>
                     </div>
-                    <div class="team-title p-4">
-                        <h4 class="mb-0">David James</h4>
-                        <p class="mb-0">Profession</p>
+                    <div class="col-8 col-lg-8 col-xl-9">
+                        <div class="d-flex flex-column my-auto text-start p-4">
+                            <h4 class="text-dark mb-0">Anh Độ</h4>
+                            <p class="mb-3">Nhân viên văn phòng</p>
+                            <div class="d-flex text-primary mb-3">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star text-body"></i>
+                            </div>
+                            <p class="mb-0">"Không gian tiện nghi và dịch vụ chất lượng cao. Tôi rất ấn tượng với cách
+                                làm việc của đội ngũ."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-item bg-light rounded">
+                <div class="row g-0">
+                    <div class="col-4 col-lg-4 col-xl-3">
+                        <div class="h-100">
+                            <img src="layout/img/HURRYKNG-2.png" class="img-fluid h-100 rounded"
+                                style="object-fit: cover;" alt="">
+                        </div>
+                    </div>
+                    <div class="col-8 col-lg-8 col-xl-9">
+                        <div class="d-flex flex-column my-auto text-start p-4">
+                            <h4 class="text-dark mb-0">Anh Khang</h4>
+                            <p class="mb-3">Freelancer</p>
+                            <div class="d-flex text-primary mb-3">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star text-body"></i>
+                            </div>
+                            <p class="mb-0">"Giá cả hợp lý, dịch vụ nhanh chóng và đội ngũ rất thân thiện. Rất đáng để
+                                thử!"</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<!-- Team End -->
+<!-- Testimonial End -->
 
 
 <?php include("../layout/footer.php") ?>
