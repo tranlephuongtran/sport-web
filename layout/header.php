@@ -88,13 +88,11 @@
     <!-- Navbar & Hero Start -->
     <div class="container-fluid nav-bar px-0 px-lg-4 py-lg-0">
         <div class="container">
-
             <nav class="navbar navbar-expand-lg navbar-light">
                 <h1 class="text-primary mb-0"><img src="layout/img/logo.png" alt="Logo"
                         style="width: 250px; height: 220px;">
                 </h1>
                 <a href="#" class="navbar-brand p-0">
-
                     <!-- <img src="img/logo.png" alt="Logo"> -->
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
@@ -119,6 +117,7 @@
                             </div>
                         </div>
                         <a href="page/contact/index.php" class="nav-item nav-link">Contact</a>
+
                         <div class="nav-btn px-3">
                             <button class="btn-search btn btn-primary btn-md-square rounded-circle flex-shrink-0"
                                 data-bs-toggle="modal" data-bs-target="#searchModal"><i
@@ -127,6 +126,15 @@
                                 Quote</a>
                         </div>
                     </div>
+                </div>
+                <div class="d-none d-xl-flex flex-shrink-0 ps-4">
+                    <?php if ($isLoggedIn): ?>
+                        <a href="#" class="btn btn-primary rounded-pill py-2 px-4 flex-shrink-0">Sign Out</a>
+                    <?php else: ?>
+                        <a href="index.php?login" class="btn btn-primary rounded-pill py-2 px-3 me-2 flex-shrink-0">Sign
+                            in</a>
+                        <a href="index.php?register" class="btn btn-light rounded-pill py-2 px-4 flex-shrink-0">Sign up</a>
+                    <?php endif; ?>
                 </div>
                 <div class="d-none d-xl-flex flex-shrink-0 ps-4">
                     <a href="#" class="btn btn-light btn-lg-square rounded-circle position-relative wow tada"
