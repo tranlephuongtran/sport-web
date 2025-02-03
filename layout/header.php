@@ -117,7 +117,6 @@
                             </div>
                         </div> -->
                         <a href="index.php?rule" class="nav-item nav-link">Điều khoản</a>
-                        <a href="page/contact/index.php" class="nav-item nav-link">Liên hệ</a>
 
                         <div class="nav-btn px-2">
                             <button class="btn-search btn btn-primary btn-md-square rounded-circle flex-shrink-0"

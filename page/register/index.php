@@ -43,6 +43,10 @@ if (!isset($_GET['register'])) {
                 </div>
             </div>
             <div class="form-group">
+                <i class="fa-regular fa-user"></i>
+                <input type="text" class="form-input" placeholder="Tên của bạn" id="name" required>
+            </div>
+            <div class="form-group">
                 <i class="fa-solid fa-phone"></i>
                 <input type="tel" class="form-input" placeholder="Số điện thoại" id="phone" required>
             </div>

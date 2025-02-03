@@ -7,6 +7,8 @@ if (isset($_GET['register'])) {
     $page = 'login';
 } else if (isset($_GET['rule'])) {
     $page = 'rule';
+} else if (isset($_GET['profile'])) {
+    $page = 'profile';
 } else {
     $page = 'home';
 }

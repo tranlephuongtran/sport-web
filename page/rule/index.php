@@ -40,9 +40,6 @@
         <li class="nav-item">
             <button class="nav-link fs-4 px-4 py-2" onclick="showPolicy('terms', this)">Điều khoản sử dụng</button>
         </li>
-        <li class="nav-item">
-            <button class="nav-link fs-4 px-4 py-2" onclick="showPolicy('shipping', this)">Giao hàng</button>
-        </li>
     </ul>
 
     <!-- Nội dung chính sách -->
