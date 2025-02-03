@@ -1,9 +1,14 @@
-<?php include("../layout/header.php") ?>
-
+<?php include("../layout/header.php");
+if (!isset($_GET['about'])) {
+    $about = 1;
+} else {
+    $about = $_GET['about'];
+}
+?>
 <!-- Header Start -->
 <div class="container-fluid bg-breadcrumb">
     <div class="container text-center py-5" style="max-width: 900px;">
-        <h4 class="text-white display-4 mb-4 wow fadeInDown" data-wow-delay="0.1s">Về Chúng Tôi</h4>
+        <h4 class="text-white display-4 mb-4 wow fadeInDown" data-wow-delay="0.1s">Giới thiệu</h4>
     </div>
 </div>
 <!-- Header End -->

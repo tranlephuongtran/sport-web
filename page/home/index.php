@@ -1,4 +1,9 @@
-<?php include("../../layout/header.php") ?>
+<?php include("../../layout/header.php");
+if (!isset($_GET['about'])) {
+    $about = 1;
+} else {
+    $about = $_GET['about'];
+} ?>
 
 <!-- Carousel Start -->
 <div class="header-carousel owl-carousel">

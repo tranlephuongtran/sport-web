@@ -99,12 +99,12 @@
                     <span class="fa fa-bars"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarCollapse">
-                    <div class="navbar-nav mx-0 mx-lg-auto">
-                        <a href="page/home/index.php" class="nav-item nav-link active">Home</a>
-                        <a href="page/about/index.php" class="nav-item nav-link">About</a>
-                        <a href="page/service/index.php" class="nav-item nav-link">Services</a>
-                        <a href="page/blog/index.php" class="nav-item nav-link">Blog</a>
-                        <div class="nav-item dropdown">
+                    <div class="navbar-nav mx mx-lg-auto">
+                        <a href="index.php?home" class="nav-item nav-link active">Trang chủ</a>
+                        <a href="index.php?about" class="nav-item nav-link">Giới thiệu</a>
+                        <a href="page/service/index.php" class="nav-item nav-link">Đặt sân</a>
+                        <a href="page/blog/index.php" class="nav-item nav-link">Tin tức</a>
+                        <!-- <div class="nav-item dropdown">
                             <a href="#" class="nav-link" data-bs-toggle="dropdown">
                                 <span class="dropdown-toggle">Pages</span>
                             </a>
@@ -115,15 +115,14 @@
                                 <a href="page/FAQ/index.php" class="dropdown-item">FAQs</a>
                                 <a href="page/404/index.php" class="dropdown-item">404 Page</a>
                             </div>
-                        </div>
-                        <a href="page/contact/index.php" class="nav-item nav-link">Contact</a>
+                        </div> -->
+                        <a href="index.php?rule" class="nav-item nav-link">Điều khoản</a>
+                        <a href="page/contact/index.php" class="nav-item nav-link">Liên hệ</a>
 
-                        <div class="nav-btn px-3">
+                        <div class="nav-btn px-2">
                             <button class="btn-search btn btn-primary btn-md-square rounded-circle flex-shrink-0"
                                 data-bs-toggle="modal" data-bs-target="#searchModal"><i
                                     class="fas fa-search"></i></button>
-                            <a href="#" class="btn btn-primary rounded-pill py-2 px-4 ms-3 flex-shrink-0"> Get a
-                                Quote</a>
                         </div>
                     </div>
                 </div>
@@ -131,9 +130,9 @@
                     <?php if ($isLoggedIn): ?>
                         <a href="#" class="btn btn-primary rounded-pill py-2 px-4 flex-shrink-0">Sign Out</a>
                     <?php else: ?>
-                        <a href="index.php?login" class="btn btn-primary rounded-pill py-2 px-3 me-2 flex-shrink-0">Sign
-                            in</a>
-                        <a href="index.php?register" class="btn btn-light rounded-pill py-2 px-4 flex-shrink-0">Sign up</a>
+                        <a href="index.php?login" class="btn btn-primary rounded-pill py-2 px-3 me-2 flex-shrink-0">Đăng
+                            nhập</a>
+                        <a href="index.php?register" class="btn btn-light rounded-pill py-2 px-4 flex-shrink-0">Đăng ký</a>
                     <?php endif; ?>
                 </div>
                 <div class="d-none d-xl-flex flex-shrink-0 ps-4">
@@ -145,8 +144,8 @@
                         </div>
                     </a>
                     <div class="d-flex flex-column ms-3">
-                        <span>Call to Our Experts</span>
-                        <a href="tel:+ 0123 456 7890"><span class="text-dark">Free: + 0123 456 7890</span></a>
+                        <span>Số Hotline</span>
+                        <a href="tel:+ 0123 456 7890"><span class="text-dark">0123 456 7890</span></a>
                     </div>
                 </div>
             </nav>
