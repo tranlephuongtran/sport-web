@@ -21,10 +21,6 @@ if (!isset($_GET['register'])) {
         <form id="form-login" onsubmit="return validateForm()">
             <h1 class="form-heading">Đăng Ký</h1>
             <div class="form-group">
-                <i class="fa-regular fa-user"></i>
-                <input type="text" class="form-input" placeholder="Tên đăng nhập" id="username" required>
-            </div>
-            <div class="form-group">
                 <i class="fa-regular fa-envelope"></i>
                 <input type="email" class="form-input" placeholder="Email" id="email" required>
             </div>
@@ -51,8 +47,8 @@ if (!isset($_GET['register'])) {
                 <input type="tel" class="form-input" placeholder="Số điện thoại" id="phone" required>
             </div>
             <input type="checkbox" id="agreePolicy" style="width: auto; margin-right: 10px;" required>
-            <label for="agreePolicy" style="color: #f5f5f5; font-size: 14px;">Tôi đồng ý với <a href="#" target="_blank"
-                    style="color: rgb(215, 248, 124);">chính sách và điều
+            <label for="agreePolicy" style="color: #f5f5f5; font-size: 14px;">Tôi đồng ý với <a href="index.php?rule"
+                    target="_blank" style="color: rgb(215, 248, 124);">chính sách và điều
                     khoản</a>.</label><br>
             <a href="index.php?login" id="link-register">Đã có tài khoản!</a>
             <input type="submit" value="Đăng ký" class="form-submit">
