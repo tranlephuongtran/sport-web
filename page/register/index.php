@@ -15,6 +15,23 @@ if (!isset($_GET['register'])) {
     $login = $_GET['register'];
 }
 ?>
+<style>
+    .status-paid {
+        color: green;
+        font-weight: bold;
+    }
+
+    .status-unpaid {
+        color: red;
+        font-weight: bold;
+    }
+
+    .table th,
+    .table td {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
 
 <body>
     <div id="wrapper">

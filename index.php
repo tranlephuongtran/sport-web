@@ -9,6 +9,8 @@ if (isset($_GET['register'])) {
     $page = 'rule';
 } else if (isset($_GET['profile'])) {
     $page = 'profile';
+} else if (isset($_GET['history'])) {
+    $page = 'history';
 } else {
     $page = 'home';
 }
