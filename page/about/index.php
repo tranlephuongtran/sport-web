@@ -275,10 +275,10 @@ if (!isset($_GET['about'])) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-6 col-xl-6 wow fadeInUp" data-wow-delay="0.4s">
+            <div class="col-md-6 col-lg-6 col-xl-6 wow fadeInUp" data-wow-delay="0.2s">
                 <div class="team-item">
                     <div class="team-img">
-                        <img src="layout/img/team-2.jpg" class="img-fluid rounded-top w-100" alt="">
+                        <img src="layout/img/profile-quan.jpg" class="img-fluid rounded-top w-100" alt="">
                         <div class="team-icon">
                             <a class="btn btn-primary btn-sm-square rounded-pill mb-2" href=""><i
                                     class="fab fa-facebook-f"></i></a>

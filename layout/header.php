@@ -102,7 +102,7 @@
                     <div class="navbar-nav mx mx-lg-auto">
                         <a href="index.php?home" class="nav-item nav-link active">Trang chủ</a>
                         <a href="index.php?about" class="nav-item nav-link">Giới thiệu</a>
-                        <a href="page/service/index.php" class="nav-item nav-link">Đặt sân</a>
+                        <a href="index.php?order" class="nav-item nav-link">Đặt sân</a>
                         <a href="page/blog/index.php" class="nav-item nav-link">Tin tức</a>
                         <!-- <div class="nav-item dropdown">
                             <a href="#" class="nav-link" data-bs-toggle="dropdown">
