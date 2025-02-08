@@ -21,6 +21,8 @@ if (isset($_GET['rule'])) {
     $page = 'orderconfirm';
 } else if (isset($_GET['payment'])) {
     $page = 'payment';
+} else if (isset($_GET['about'])) {
+    $page = 'about';
 } else {
     $page = 'home';
 }

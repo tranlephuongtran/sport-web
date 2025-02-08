@@ -2,7 +2,7 @@
 <style>
     .card {
         background-color: #f8f9fa;
-        border: 1px solid #007bff;
+        /* border: 1px solid #007bff; */
         border-radius: 10px;
         padding: 20px;
         box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
@@ -10,10 +10,11 @@
     }
 
     .total {
-        margin-left: 70%;
+        margin-left: 50%;
+
     }
 
-    .total h5 strong {
+    .total h6 strong {
         float: right;
     }
 
@@ -46,7 +47,7 @@
 
     }
 
-    h5 {
+    h6 {
         font-weight: bold;
         color: #343a40;
     }
@@ -58,11 +59,11 @@
 </div>
 <div class="container col-6 mt-5">
 
-    <div class="card p-3">
+    <div class="card p-3 col-12">
         <p>Mã đơn: <strong>#GOVAP-202502-12</strong></p>
         <p>Ngày tạo: <strong>02-02-2025</strong></p>
-        <p>Thời gian: <strong>21:02:37</strong></p>
-        <p>Thu ngân: <strong>Administrator</strong></p>
+        <p>Ngày chơi: <strong>12-02-2025</strong></p>
+        <p>Khách hàng: <strong>Huỳnh Hồ Hoài Nam</strong></p>
     </div>
 
     <h5 class="mt-4">Thông tin sân</h5>
@@ -77,18 +78,18 @@
         <tbody>
             <tr>
                 <td>Sân 02</td>
-                <td>7:00-7:30</td>
+                <td>7:00 - 7:30</td>
                 <td>60.000 đ</td>
             </tr>
             <tr>
                 <td>Sân 03</td>
-                <td>7:00-7:30</td>
+                <td>7:00 - 7:30</td>
                 <td>60.000 đ</td>
             </tr>
         </tbody>
     </table>
-    <div class="total row">
-        <h5 class="mt-4 form-label">Khuyến Mãi:</h5>
+    <div class="total">
+        <h6 class="mt-4 form-label">Khuyến Mãi:</h6>
 
         <select class="col-7" id="discount">
             <option value="GiamGia01">Vui lòng chọn</option>
@@ -98,25 +99,17 @@
         </select>
         <button class="btn btn-primary col-4" onclick="applyDiscount()">Áp dụng</button>
 
-        <h5 class="mt-4">Tổng tiền sân: <strong>120.000 đ</strong></h5>
-        <h5 class="mt-4">Giảm giá sân: <strong>- 20.000 đ</strong></h5>
-        <h5 class="mt-4"><b>TỔNG TIỀN:</b> <strong>100.000 đ</strong></h5>
+        <h6 class="mt-4">Tổng tiền sân: <strong>120.000 đ</strong></h6>
+        <h6 class="mt-4">Giảm giá sân: <strong>- 20.000 đ</strong></h6>
+        <h6 class="mt-4">TỔNG TIỀN: <strong>100.000 đ</strong></h6>
 
-        <button class="btn btn-primary mb-2 col-6" onclick="window.location.href='index.php?payment'">Thanh
+        <button class="btn btn-primary mb-2" onclick="window.location.href='index.php?payment'">Thanh
             toán</button>
-        <button class="btn btn-success mb-2 col-5">In hóa đơn</button>
+
 
     </div>
 
 </div>
 
-<script>
-    function applyDiscount() {
-        const discountSelect = document.getElementById('discount');
-        const selectedCoupon = discountSelect.value;
-        alert(`Mã giảm giá ${selectedCoupon} đã được áp dụng.`);
-        // Logic để cập nhật tổng tiền có thể được thêm vào đây
-    }
-</script>
 
 <?php include("../layout/footer.php"); ?>
