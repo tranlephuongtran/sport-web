@@ -23,6 +23,8 @@ if (isset($_GET['rule'])) {
     $page = 'payment';
 } else if (isset($_GET['about'])) {
     $page = 'about';
+} else if (isset($_GET['logout'])) {
+    $page = 'logout';
 } else {
     $page = 'home';
 }

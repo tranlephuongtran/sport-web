@@ -31,6 +31,9 @@
     <!-- Template Stylesheet -->
     <link href="layout/css/style.css" rel="stylesheet">
 </head>
+<style>
+
+</style>
 
 <body>
 
@@ -126,8 +129,17 @@
                     </div>
                 </div>
                 <div class="d-none d-xl-flex flex-shrink-0 ps-4">
-                    <?php if ($isLoggedIn): ?>
-                        <a href="#" class="btn btn-primary rounded-pill py-2 px-4 flex-shrink-0">Sign Out</a>
+                    <?php if (isset($_SESSION['login'])): ?>
+                        <div class="nav-item dropdown" style="position: relative;">
+                            <a href="#" data-bs-toggle="dropdown">
+                                <img src="layout/img/user.svg" class="avatar btn btn-primary flex-shrink-0"
+                                    style="border-radius: 50px;width: 40px;height: 40px;">
+                            </a>
+                            <div class="dropdown-menu">
+                                <a href="#" class="dropdown-item">Thông tin cá nhân</a>
+                                <a href="index.php?logout" class="dropdown-item">Đăng xuất</a>
+                            </div>
+                        </div>
                     <?php else: ?>
                         <a href="index.php?login" class="btn btn-primary rounded-pill py-2 px-3 me-2 flex-shrink-0">Đăng
                             nhập</a>
