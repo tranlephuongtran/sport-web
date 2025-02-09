@@ -38,7 +38,7 @@ if (isset($_POST['btnLogin'])) {
     $result = mysqli_query($conn, $query);
     if ($user = mysqli_fetch_assoc($result)) {
         if ($password === $user['password']) {
-            $_SESSION['login'] = $user['maKH'];
+            $_SESSION['login'] = $user['maNguoiDung'];
             echo '<script>
                 alert("Đăng nhập thành công");
                 window.location.href = "index.php?home";
@@ -67,10 +67,7 @@ if (isset($_POST['btnLogin'])) {
             return false;
         }
 
-        if (!passwordPattern.test(password)) {
-            alert('Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.');
-            return false;
-        }
+
 
         return true; // Valid inputs
     }

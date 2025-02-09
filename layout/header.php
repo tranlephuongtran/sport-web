@@ -136,7 +136,8 @@
                                     style="border-radius: 50px;width: 40px;height: 40px;">
                             </a>
                             <div class="dropdown-menu">
-                                <a href="#" class="dropdown-item">Thông tin cá nhân</a>
+                                <a href="index.php?profile" class="dropdown-item">Thông tin cá nhân</a>
+                                <a href="index.php?history" class="dropdown-item">Lịch sử giao dịch</a>
                                 <a href="index.php?logout" class="dropdown-item">Đăng xuất</a>
                             </div>
                         </div>

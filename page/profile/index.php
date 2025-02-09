@@ -3,7 +3,20 @@ if (!isset($_GET['profile'])) {
     $profile = 1;
 } else {
     $profile = $_GET['profile'];
-} ?>
+}
+$conn = mysqli_connect("localhost", "nhomcnm", "nhomcnm", "sport");
+$user = $_SESSION['login'];
+$str = "SELECT * FROM taikhoan tk INNER JOIN nguoidung nd ON tk.maTK = nd.maTK WHERE maNguoiDung = $user";
+$result = $conn->query($str);
+if (mysqli_num_rows($result) > 0) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $ten = $row['ten'];
+        $sdt = $row['sdt'];
+        $email = $row['email'];
+        $password = $row['password'];
+    }
+}
+?>
 
 <?php include("../layout/header.php"); ?>
 <style>
@@ -165,11 +178,9 @@ if (!isset($_GET['profile'])) {
                 <div id="current-info" class="tab-content" style="margin-left: 270px;">
                     <h3 class="mb-3">📋 Thông tin tài khoản</h3>
                     <div class="account-info">
-                        <p><strong>Tên đăng nhập:</strong> <span>username123</span></p>
-                        <p><strong>Email:</strong> <span>email@example.com</span></p>
-                        <p><strong>Tên của bạn:</strong> <span>Nguyễn Văn A</span></p>
-                        <p><strong>Số điện thoại:</strong> <span>0987654321</span></p>
-                        <p><strong>Ngày tham gia:</strong> <span>01/01/2024</span></p>
+                        <p><strong>Email: </strong> <span><?= $email ?></span></p>
+                        <p><strong>Tên của bạn:</strong> <span><?= $ten ?></span></p>
+                        <p><strong>Số điện thoại:</strong> <span><?= $sdt ?></span></p>
                         <p><strong>Trạng thái tài khoản:</strong> <span style="color: green;">Hoạt động</span></p>
                     </div>
                 </div>
@@ -177,40 +188,43 @@ if (!isset($_GET['profile'])) {
                 <!-- Cập nhật thông tin -->
                 <div id="update-info" class="tab-content" style="display: none;">
                     <h3 class="mb-3">✏️ Cập nhật thông tin</h3>
-                    <form>
+                    <form method="POST" action="">
                         <div class="mb-4">
                             <label class="form-label">Email</label>
-                            <input type="email" class="form-control" value="email@example.com">
+                            <input type="email" class="form-control" value="<?= $email ?>" name="email">
                         </div>
                         <div class="mb-4">
                             <label class="form-label">Tên của bạn</label>
-                            <input type="text" class="form-control" value="Nguyễn Văn A">
+                            <input type="text" class="form-control" value="<?= $ten ?>" name="name">
                         </div>
                         <div class="mb-4">
                             <label class="form-label">Số điện thoại</label>
-                            <input type="text" class="form-control" value="0987654321">
+                            <input type="text" class="form-control" value="<?= $sdt ?>" name="phone">
                         </div>
-                        <button type="submit" class="btn btn-primary btn-custom">💾 Lưu thay đổi</button>
+                        <button type="submit" class="btn btn-primary btn-custom" name="btn-save-profile">💾 Lưu thay
+                            đổi</button>
                     </form>
+
                 </div>
 
                 <!-- Đổi mật khẩu -->
                 <div id="change-password" class="tab-content" style="display: none;">
                     <h3 class="mb-3">🔒 Đổi mật khẩu</h3>
-                    <form>
+                    <form method="POST" action="">
                         <div class="mb-4">
-                            <label class="form-label">Mật khẩu hiện tại</label>
-                            <input type="password" class="form-control">
+                            <label class="form-label">Mật khẩu cũ</label>
+                            <input type="password" class="form-control" name="old_password" required>
                         </div>
                         <div class="mb-4">
                             <label class="form-label">Mật khẩu mới</label>
-                            <input type="password" class="form-control">
+                            <input type="password" class="form-control" name="new_password" required>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label">Xác nhận mật khẩu</label>
-                            <input type="password" class="form-control">
+                            <label class="form-label">Xác nhận mật khẩu mới</label>
+                            <input type="password" class="form-control" name="confirm_password" required>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-custom">🔄 Cập nhật mật khẩu</button>
+                        <button type="submit" class="btn btn-primary btn-custom" name="btn-change-password">🔒 Đổi mật
+                            khẩu</button>
                     </form>
                 </div>
             </div>
@@ -218,4 +232,46 @@ if (!isset($_GET['profile'])) {
     </div>
 </div>
 <div style="margin-bottom: 150px;"></div>
-<?php include("../layout/footer.php"); ?>
+<?php include("../layout/footer.php");
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['btn-save-profile'])) {
+    $new_email = $_POST['email'];
+    $new_name = $_POST['name'];
+    $new_phone = $_POST['phone'];
+
+    // Cập nhật bảng taikhoan (chỉ cập nhật email)
+    $sql1 = "UPDATE taikhoan SET email = '$new_email' WHERE maTK = (SELECT maTK FROM nguoidung WHERE maNguoiDung = $user)";
+    mysqli_query($conn, $sql1);
+
+    // Cập nhật bảng nguoidung (cập nhật tên và số điện thoại)
+    $sql2 = "UPDATE nguoidung SET ten = '$new_name', sdt = '$new_phone' WHERE maNguoiDung = $user";
+    mysqli_query($conn, $sql2);
+
+    echo "<script>alert('Cập nhật thông tin thành công!'); window.location.href = 'index.php?profile'</script>";
+    exit();
+}
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['btn-change-password'])) {
+    $old_password = $_POST['old_password'];
+    $new_password = $_POST['new_password'];
+    $confirm_password = $_POST['confirm_password'];
+
+
+    if ($old_password !== $password) {
+        echo "<script>alert('Mật khẩu cũ không chính xác!');</script>";
+    } else if (!preg_match($pattern = "/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$/", $new_password)) {
+        echo "<script>alert('Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!');</script>";
+    } else if ($new_password !== $confirm_password) {
+        echo "<script>alert('Mật khẩu xác nhận không khớp!');</script>";
+    } else {
+        // Cập nhật mật khẩu mới vào CSDL
+        $update_sql = "UPDATE taikhoan SET password = '$new_password' WHERE maTK = (SELECT maTK FROM nguoidung WHERE maNguoiDung = $user)";
+        if (mysqli_query($conn, $update_sql)) {
+            echo "<script>alert('Đổi mật khẩu thành công!'); window.location.href='index.php?profile';</script>";
+        } else {
+            echo "<script>alert('Lỗi khi đổi mật khẩu, vui lòng thử lại!');</script>";
+        }
+    }
+
+    // Đóng kết nối
+    mysqli_close($conn);
+}
+?>
