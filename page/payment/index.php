@@ -62,7 +62,7 @@
             <div class="row">
                 <div class="col-md-4">
                     <div class="border p-4">
-                        <h2 class="h4 mb-3 text-black">PHƯƠNG THỨC THANH TOÁN</h2>
+                        <h2 class="h5 mb-3 text-black">PHƯƠNG THỨC THANH TOÁN</h2>
                         <div class="p-3">
                             <div class="border mb-3">
                                 <table class="table">
@@ -107,7 +107,7 @@
                 </div>
                 <div class="col-md-8">
                     <div class="border p-4">
-                        <h2 class="h4 mb-3 text-black text-center">THÔNG TIN THANH TOÁN</h2>
+                        <h2 class="h5 mb-3 text-black text-center">THÔNG TIN THANH TOÁN</h2>
                         <div class="p-5 bg-white">
                             <div class="row">
                                 <div class="col-md-6">
