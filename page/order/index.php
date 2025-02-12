@@ -52,10 +52,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Tính tổng tiền
     $total_price = 0;
-    foreach ($_SESSION['booking']['courts'] as $times) {
-        $total_price += count($times) * 50000;
+    foreach ($_SESSION['booking']['courts'] as $court => $times) {
+        $query = "SELECT giaKhoangCach FROM san WHERE tenSan = '$court'";
+        $result = mysqli_query($conn, $query);
+        $row = mysqli_fetch_assoc($result);
+        $price_per_slot = $row['giaKhoangCach'];
+
+        $total_price += count($times) * $price_per_slot;
     }
     $_SESSION['booking']['total_price'] = $total_price;
+
 }
 
 $booking = $_SESSION['booking'] ?? [];
