@@ -1,7 +1,7 @@
 <?php
 session_start();
 $conn = mysqli_connect("localhost", "nhomcnm", "nhomcnm", "sport");
-$str = "SELECT tensan, khunggio FROM san";
+$str = "SELECT tenSan, khungGio FROM san";
 $result = $conn->query($str);
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -150,12 +150,19 @@ $total_price = $booking['total_price'] ?? 0;
             <h5 style="color: #004aad;">Chọn sân:</h5>
             <form method="POST">
 
-                <?php foreach (["Sân 01", "Sân 02", "Sân 03", "Sân 04"] as $court_option): ?>
-                    <button type="submit" name="court" value="<?= $court_option ?>"
-                        class="btn-custom <?= $selected_court == $court_option ? 'selected' : '' ?>">
-                        <?= $court_option ?>
-                    </button>
-                <?php endforeach; ?>
+                <?php
+                if (mysqli_num_rows($result) > 0) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $court_option = $row['tenSan']; // Gán giá trị từ DB vào biến
+                        ?>
+                        <button type="submit" name="court" value="<?= $court_option ?>"
+                            class="btn-custom <?= $selected_court == $court_option ? 'selected' : '' ?>">
+                            <?= $court_option ?>
+                        </button>
+                    <?php }
+                }
+                ?>
+
             </form>
         </div>
 
@@ -170,36 +177,31 @@ $total_price = $booking['total_price'] ?? 0;
             <h5 style="color: #004aad; margin-top: 20px">Chọn khung giờ:</h5>
             <div class="time-slots">
                 <?php
-                $time_slots = [
-                    "05:30 - 06:00",
-                    "06:00 - 06:30",
-                    "06:30 - 07:00",
-                    "07:00 - 07:30",
-                    "07:30 - 08:00",
-                    "08:00 - 08:30",
-                    "08:30 - 09:00",
-                    "09:00 - 09:30",
-                    "09:30 - 10:00",
-                    "10:00 - 10:30",
-                    "10:30 - 11:00",
-                    "11:00 - 11:30",
-                    "11:30 - 12:00",
-                    "12:00 - 12:30",
-                    "12:30 - 13:00"
-                ];
                 if ($selected_court) {
-                    $selected_times = $courts[$selected_court] ?? [];
-                    foreach ($time_slots as $slot) {
-                        $selected = in_array($slot, $selected_times) ? "selected" : "";
-                        echo "<form method='POST' style='display:inline;'>
-                                <input type='hidden' name='time_slot' value='$slot'>
-                                <button type='submit' class='btn btn-outline-primary $selected'>$slot</button>
-                              </form>";
+                    // Lấy khung giờ của sân đã chọn
+                    $query = "SELECT khungGio FROM san WHERE tenSan = '$selected_court'";
+                    $result = mysqli_query($conn, $query);
+                    $row = mysqli_fetch_assoc($result);
+
+                    if ($row) {
+                        $time_slots = explode(", ", $row['khungGio']); // Tách chuỗi khung giờ thành mảng
+                        $selected_times = $courts[$selected_court] ?? [];
+
+                        foreach ($time_slots as $slot) {
+                            $selected = in_array($slot, $selected_times) ? "selected" : "";
+                            echo "<form method='POST' style='display:inline;'>
+                    <input type='hidden' name='time_slot' value='$slot'>
+                    <button type='submit' class='btn btn-outline-primary $selected'>$slot</button>
+                  </form>";
+                        }
+                    } else {
+                        echo "<p>Không tìm thấy khung giờ cho sân này.</p>";
                     }
                 } else {
                     echo "<p>Chọn sân trước khi chọn khung giờ</p>";
                 }
                 ?>
+
             </div>
         </div>
 
