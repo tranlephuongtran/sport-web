@@ -157,7 +157,8 @@ $total_price = $booking['total_price'] ?? 0;
         margin-top: 20px;
     }
 
-    .time-slots form {
+    .time-slots form,
+    .time-slots button {
         width: 100%;
     }
 
@@ -176,21 +177,13 @@ $total_price = $booking['total_price'] ?? 0;
         gap: 5px;
     }
 
-    .time-slot-button.available {
-        background-color: #e0e9f5;
-        color: #004aad;
-        border: 1px solid #004aad;
-    }
-
-    .time-slot-button.selected {
-        background-color: #004aad;
-        color: white;
-    }
-
+    /* Sửa lại style cho button đã đặt */
     .time-slot-button.booked {
         background-color: #e9ecef;
         color: #6c757d;
         cursor: not-allowed;
+        width: 100%;
+        border: none;
     }
 
     .time-slot-time {
@@ -282,7 +275,7 @@ $total_price = $booking['total_price'] ?? 0;
     }
 
     .color-box.available {
-        background-color: #e0e9f5;
+        background-color: rgb(255, 255, 255);
         border: 1px solid #004aad;
     }
 
@@ -291,7 +284,7 @@ $total_price = $booking['total_price'] ?? 0;
     }
 
     .color-box.booked {
-        background-color: #e9ecef;
+        background-color: #677080;
     }
 </style>
 
@@ -424,7 +417,7 @@ $total_price = $booking['total_price'] ?? 0;
                             <input type='hidden' name='time_slot' value='{$slot['time']}'>
                             <input type='hidden' name='price' value='{$slot['price']}'>
                             <button type='submit' class='btn " . ($is_selected ? "btn-secondary-select" : "btn-outline-primary") . "'>
-                                {$slot['time']} - " . number_format($slot['price']) . " VND
+                                {$slot['time']} (" . number_format($slot['price']) . " VND)
                             </button>
                         </form> ";
                                     }
