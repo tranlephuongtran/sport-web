@@ -143,6 +143,11 @@ $total_price = $booking['total_price'] ?? 0;
         cursor: pointer;
         margin-left: 10px;
     }
+
+    .btn-secondary-select {
+        background-color: #004aad !important;
+        color: white !important;
+    }
 </style>
 <div class="container">
     <div class="row">
@@ -185,15 +190,32 @@ $total_price = $booking['total_price'] ?? 0;
 
                     if ($row) {
                         $time_slots = explode(", ", $row['khungGio']); // Tách chuỗi khung giờ thành mảng
-                        $selected_times = $courts[$selected_court] ?? [];
+                
+                        // Lấy danh sách khung giờ đã được đặt trước từ bảng tinhtrangsan
+                        $query_booked = "SELECT khungGio FROM tinhtrangsan WHERE maSan = (SELECT maSan FROM san WHERE tenSan = '$selected_court')";
+                        $result_booked = mysqli_query($conn, $query_booked);
+                        $booked_times = [];
+
+                        while ($booked_row = mysqli_fetch_assoc($result_booked)) {
+                            // Tách từng khung giờ từ bảng tinhtrangsan và thêm vào danh sách đã đặt
+                            $booked_slots = explode(", ", $booked_row['khungGio']);
+                            $booked_times = array_merge($booked_times, $booked_slots);
+                        }
 
                         foreach ($time_slots as $slot) {
-                            $selected = in_array($slot, $selected_times) ? "selected" : "";
-                            echo "<form method='POST' style='display:inline;'>
-                    <input type='hidden' name='time_slot' value='$slot'>
-                    <button type='submit' class='btn btn-outline-primary $selected'>$slot</button>
-                  </form>";
+                            $is_booked = in_array($slot, $booked_times);
+                            $is_selected = isset($_SESSION['booking']['courts'][$selected_court]) && in_array($slot, $_SESSION['booking']['courts'][$selected_court]);
+
+                            if ($is_booked) {
+                                echo "<button class='btn btn-dark' disabled>$slot</button> ";
+                            } else {
+                                echo "<form method='POST' style='display:inline;'>
+                                    <input type='hidden' name='time_slot' value='$slot'>
+                                    <button type='submit' class='btn " . ($is_selected ? "btn-secondary-select" : "btn-outline-primary") . "'>$slot</button>
+                                </form> ";
+                            }
                         }
+
                     } else {
                         echo "<p>Không tìm thấy khung giờ cho sân này.</p>";
                     }
@@ -201,8 +223,10 @@ $total_price = $booking['total_price'] ?? 0;
                     echo "<p>Chọn sân trước khi chọn khung giờ</p>";
                 }
                 ?>
-
             </div>
+
+
+
         </div>
 
         <div class="col-md-3 section">
