@@ -1,265 +1,241 @@
-<?php include("../layout/header.php") ?>
+<?php
+session_start();
+$conn = mysqli_connect("localhost", "nhomcnm", "nhomcnm", "sport");
+$str = "SELECT tensan, khunggio FROM san";
+$result = $conn->query($str);
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST['date'])) {
+        $_SESSION['booking']['date'] = $_POST['date'];
+    }
+
+    if (isset($_POST['court'])) {
+        $court = $_POST['court'];
+        if (!isset($_SESSION['booking']['courts'][$court])) {
+            $_SESSION['booking']['courts'][$court] = [];
+        }
+        $_SESSION['booking']['selected_court'] = $court;
+    }
+
+    if (isset($_POST['time_slot']) && isset($_SESSION['booking']['selected_court'])) {
+        $selected_court = $_SESSION['booking']['selected_court'];
+        $selected_time = $_POST['time_slot'];
+
+        if (!isset($_SESSION['booking']['courts'][$selected_court])) {
+            $_SESSION['booking']['courts'][$selected_court] = [];
+        }
+
+        if (in_array($selected_time, $_SESSION['booking']['courts'][$selected_court])) {
+            $_SESSION['booking']['courts'][$selected_court] = array_diff(
+                $_SESSION['booking']['courts'][$selected_court],
+                [$selected_time]
+            );
+        } else {
+            $_SESSION['booking']['courts'][$selected_court][] = $selected_time;
+        }
+    }
+
+    if (isset($_POST['remove_time_slot']) && isset($_POST['court'])) {
+        $court = $_POST['court'];
+        $time = $_POST['remove_time_slot'];
+        if (isset($_SESSION['booking']['courts'][$court])) {
+            $_SESSION['booking']['courts'][$court] = array_diff($_SESSION['booking']['courts'][$court], [$time]);
+        }
+    }
+
+    // Loại bỏ các sân không có khung giờ nào đã chọn
+    foreach ($_SESSION['booking']['courts'] as $court => $times) {
+        if (empty($times)) {
+            unset($_SESSION['booking']['courts'][$court]);
+        }
+    }
+
+    // Tính tổng tiền
+    $total_price = 0;
+    foreach ($_SESSION['booking']['courts'] as $times) {
+        $total_price += count($times) * 50000;
+    }
+    $_SESSION['booking']['total_price'] = $total_price;
+}
+
+$booking = $_SESSION['booking'] ?? [];
+$date = $booking['date'] ?? 'Chưa chọn';
+$courts = $booking['courts'] ?? [];
+$selected_court = $booking['selected_court'] ?? null;
+$total_price = $booking['total_price'] ?? 0;
+?>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-    /* CSS styles as before */
-    .time-slot {
-        cursor: pointer;
-        border: 1px solid #ced4da;
-        border-radius: 0.375rem;
-        padding: 0.5rem;
-        text-align: center;
-        width: 120px;
-        margin: 0.25rem;
-        background-color: rgb(224, 233, 245);
-        transition: background-color 0.3s;
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
     }
 
-    .time-slot.selected {
-        background-color: rgb(29, 94, 158);
-        color: white;
-    }
-
-    .time-slot:hover {
-        background-color: rgb(29, 94, 158);
-        color: white;
-    }
-
-    .field-button {
-        width: 100%;
-        text-align: center;
-        padding: 0.5rem;
-        margin-bottom: 0.5rem;
-        background-color: rgb(224, 233, 245);
-        color: grey;
-        border: none;
-        border-radius: 0.375rem;
-        cursor: pointer;
-        transition: background-color 0.3s, color 0.3s;
-    }
-
-    .field-button.selected {
-        color: white;
-        background-color: rgb(29, 94, 158);
-    }
-
-    .field-button:hover {
-        color: white;
-        background-color: rgb(29, 94, 158);
-    }
-
-    #booking-summary {
-        background-color: #f8f9fa;
-        border: 1px solid #ced4da;
-        border-radius: 0.375rem;
-        padding: 1rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        margin-top: 1rem;
-    }
-
-    #booking-summary .list-group-item {
-        background-color: #ffffff;
-        border: none;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    #booking-summary .list-group-item:hover {
-        background-color: #e9ecef;
-    }
-
-    #total-price {
-        font-weight: bold;
-        color: #dc3545;
-    }
-
-    .booking-section {
-        background-color: rgb(244, 244, 245);
-        border-radius: 0.375rem;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .info-section {
-        border: 1px solid rgb(229, 238, 229);
-        border-radius: 0.375rem;
-        padding: 1rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        margin-bottom: 1rem;
-    }
-
-    .legend {
+    .section {
         margin-top: 20px;
-        padding: 10px;
-        align-items: center;
-        border-radius: 0.375rem;
+        margin-bottom: 20px;
+        padding: 20px;
+        border-radius: 8px;
+        background-color: #ffffff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
-    .legend-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 5px;
-    }
-
-    .legend-color {
-        width: 20px;
-        height: 20px;
-        margin-left: 10px;
-        margin-right: 10px;
-    }
-
-    #confirm-button {
+    .btn-custom {
+        display: block;
         width: 100%;
-        padding: 0.5rem;
-        border-radius: 0.375rem;
-        transition: background-color 0.3s;
+        padding: 10px;
+        margin-top: 10px;
+        border: none;
+        background-color: #e0e9f5;
+        color: black;
+        text-align: center;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 0.3s;
     }
 
-    #confirm-button:hover {
-        background-color: rgb(23, 162, 184);
+    .btn-custom:hover,
+    .btn-custom.selected {
+        background-color: #004aad;
+        color: white;
+    }
+
+    .time-slots button {
+        margin: 5px;
+        padding: 8px 12px;
+        border-radius: 5px;
+        border: 1px solid #004aad;
+        background-color: #e0e9f5;
+        transition: all 0.3s;
+    }
+
+    .time-slots button:hover,
+    .time-slots button.selected {
+        background-color: #004aad;
+        color: white;
+    }
+
+    .btn-primary-order {
+        background-color: #004aad;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        color: white;
+        text-align: center;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 20px;
+        transition: 0.3s;
+    }
+
+    .btn-primary-order:hover {
+        background-color: black;
+        color: white;
+    }
+
+    .btn-remove {
+        color: red;
+        border: none;
+        background: none;
+        cursor: pointer;
+        margin-left: 10px;
     }
 </style>
-<div class="container-fluid bg-breadcrumb">
-    <div class="container text-center py-5" style="max-width: 900px;">
-        <h4 class="text-white display-4 mb-4 wow fadeInDown" data-wow-delay="0.1s">Đặt sân</h4>
-    </div>
-</div>
-<div class="container mt-5">
+<div class="container">
     <div class="row">
-        <div class="col-md-9 booking-section">
-            <h4 class="mb-4">Đặt sân</h4>
-            <form method="POST" id="booking-form">
-                <div class="mb-3">
-                    <label for="date" class="form-label">Chọn ngày</label>
-                    <input type="date" id="date" name="date" class="form-control" style="width: 30%;" required>
-                </div>
-                <div class="row">
-                    <div class="col-2">
-                        <h5>Sân có sẵn:</h5>
-                        <?php foreach (['Sân 01', 'Sân 02', 'Sân 03', 'Sân 04'] as $court): ?>
-                            <button type="button" class="field-button"
-                                onclick="selectCourt(this)"><?php echo $court; ?></button>
-                        <?php endforeach; ?>
-                    </div>
-                    <div class="col-10">
-                        <h5>Khung giờ:</h5>
-                        <div id="time-slots" class="d-flex flex-wrap">
-                            <div class="time-slot" onclick="selectTime(this)">05:30 - 06:00</div>
-                            <div class="time-slot" onclick="selectTime(this)">06:00 - 06:30</div>
-                            <div class="time-slot" onclick="selectTime(this)">06:30 - 07:00</div>
-                            <div class="time-slot" onclick="selectTime(this)">07:00 - 07:30</div>
-                            <div class="time-slot" onclick="selectTime(this)">07:30 - 08:00</div>
-                            <div class="time-slot" onclick="selectTime(this)">08:00 - 08:30</div>
-                            <div class="time-slot" onclick="selectTime(this)">08:30 - 09:00</div>
-                            <div class="time-slot" onclick="selectTime(this)">09:00 - 09:30</div>
-                            <div class="time-slot" onclick="selectTime(this)">09:30 - 10:00</div>
-                            <div class="time-slot" onclick="selectTime(this)">10:00 - 10:30</div>
-                            <div class="time-slot" onclick="selectTime(this)">10:30 - 11:00</div>
-                            <div class="time-slot" onclick="selectTime(this)">11:00 - 11:30</div>
-                            <div class="time-slot" onclick="selectTime(this)">11:30 - 12:00</div>
-                            <div class="time-slot" onclick="selectTime(this)">12:00 - 12:30</div>
-                            <div class="time-slot" onclick="selectTime(this)">12:30 - 13:00</div>
-                            <div class="time-slot" onclick="selectTime(this)">13:00 - 13:30</div>
-                            <div class="time-slot" onclick="selectTime(this)">13:30 - 14:00</div>
-                            <div class="time-slot" onclick="selectTime(this)">14:00 - 14:30</div>
-                            <div class="time-slot" onclick="selectTime(this)">14:30 - 15:00</div>
-                            <div class="time-slot" onclick="selectTime(this)">15:00 - 15:30</div>
-                            <div class="time-slot" onclick="selectTime(this)">15:30 - 16:00</div>
-                            <div class="time-slot" onclick="selectTime(this)">16:00 - 16:30</div>
-                            <div class="time-slot" onclick="selectTime(this)">16:30 - 17:00</div>
-                            <div class="time-slot" onclick="selectTime(this)">17:00 - 17:30</div>
-                            <div class="time-slot" onclick="selectTime(this)">17:30 - 18:00</div>
-                            <div class="time-slot" onclick="selectTime(this)">18:00 - 18:30</div>
-                            <div class="time-slot" onclick="selectTime(this)">18:30 - 19:00</div>
-                            <div class="time-slot" onclick="selectTime(this)">19:00 - 19:30</div>
-                            <div class="time-slot" onclick="selectTime(this)">19:30 - 20:00</div>
-                            <div class="time-slot" onclick="selectTime(this)">20:00 - 20:30</div>
-                            <div class="time-slot" onclick="selectTime(this)">20:30 - 21:00</div>
-                        </div>
-                        <!-- Bảng chú thích -->
-                        <div class="legend">
-                            <div class="legend-item">
-                                <div class="legend-color" style="background-color:rgb(71, 70, 70);"></div>
-                                <span> Thời gian đã qua </span>
-                                <div class="legend-color" style="background-color: rgb(16, 36, 77);"></div>
-                                <span> Đã đặt </span>
-                                <div class="legend-color" style="background-color: rgb(29, 94, 158);"></div>
-                                <span> Chọn </span>
-                                <div class="legend-color" style="background-color: rgb(224, 233, 245);"></div>
-                                <span> Trống </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="col-md-3 section" style="margin-top: 100px; height: fit-content; position: relative; right: 40px">
+            <h5 style="color: #004aad;">Chọn sân:</h5>
+            <form method="POST">
+
+                <?php foreach (["Sân 01", "Sân 02", "Sân 03", "Sân 04"] as $court_option): ?>
+                    <button type="submit" name="court" value="<?= $court_option ?>"
+                        class="btn-custom <?= $selected_court == $court_option ? 'selected' : '' ?>">
+                        <?= $court_option ?>
+                    </button>
+                <?php endforeach; ?>
             </form>
         </div>
 
-        <div class="col-md-3 info-section">
-            <h4 class="mb-4">Thông tin đặt sân</h4>
-            <ul id="booking-summary" class="list-group">
-                <li class="list-group-item">
-                    <b>Sân 02 - 12/02/2025.</b>
-                    <br>Thời gian: 7:00 - 7:30
-                    <br>Thời lượng: 30p
-                    <br>Thành tiền: 60.000 đ
-                    <button class="btn btn-link text-danger" onclick="removeItem(this)">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
+        <div class="col-md-6 section" style="position: relative; right: 20px">
+            <h4 style="color: #004aad;">Đặt sân</h4>
+            <form method="POST">
+                <label for="date">Chọn ngày</label>
+                <input type="date" id="date" name="date" class="form-control" value="<?= htmlspecialchars($date) ?>"
+                    onchange="this.form.submit()">
+            </form>
+
+            <h5 style="color: #004aad; margin-top: 20px">Chọn khung giờ:</h5>
+            <div class="time-slots">
+                <?php
+                $time_slots = [
+                    "05:30 - 06:00",
+                    "06:00 - 06:30",
+                    "06:30 - 07:00",
+                    "07:00 - 07:30",
+                    "07:30 - 08:00",
+                    "08:00 - 08:30",
+                    "08:30 - 09:00",
+                    "09:00 - 09:30",
+                    "09:30 - 10:00",
+                    "10:00 - 10:30",
+                    "10:30 - 11:00",
+                    "11:00 - 11:30",
+                    "11:30 - 12:00",
+                    "12:00 - 12:30",
+                    "12:30 - 13:00"
+                ];
+                if ($selected_court) {
+                    $selected_times = $courts[$selected_court] ?? [];
+                    foreach ($time_slots as $slot) {
+                        $selected = in_array($slot, $selected_times) ? "selected" : "";
+                        echo "<form method='POST' style='display:inline;'>
+                                <input type='hidden' name='time_slot' value='$slot'>
+                                <button type='submit' class='btn btn-outline-primary $selected'>$slot</button>
+                              </form>";
+                    }
+                } else {
+                    echo "<p>Chọn sân trước khi chọn khung giờ</p>";
+                }
+                ?>
+            </div>
+        </div>
+
+        <div class="col-md-3 section">
+            <h4 style="color: #004aad; position: relative; left: 40px">Thông tin đặt sân</h4>
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Ngày chơi:</span> <strong><?= htmlspecialchars($date) ?></strong>
                 </li>
                 <li class="list-group-item">
-                    <b>Sân 03 - 12/02/2025.</b>
-                    <br>Thời gian: 7:00 - 7:30
-                    <br>Thời lượng: 30p
-                    <br>Thành tiền: 60.000 đ
-                    <button class="btn btn-link text-danger" onclick="removeItem(this)">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
+                    <span>Các sân đã chọn:</span>
+                    <ul>
+                        <?php foreach ($courts as $court_name => $times): ?>
+                            <li><strong><?= htmlspecialchars($court_name) ?></strong></li>
+                            <ul>
+                                <?php foreach ($times as $t): ?>
+                                    <li>
+                                        <?= htmlspecialchars($t) ?>
+                                        <form method="POST" style="display:inline;">
+                                            <input type="hidden" name="court" value="<?= $court_name ?>">
+                                            <input type="hidden" name="remove_time_slot" value="<?= $t ?>">
+                                            <button type="submit" class="btn-remove"><i class="fas fa-times"></i></button>
+                                        </form>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endforeach; ?>
+                    </ul>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Tổng tiền:</span> <strong><?= number_format($total_price, 0, ',', '.') ?> VND</strong>
                 </li>
             </ul>
-            <div class="mt-3">
-                <h5 class="mb-3">Tổng tiền: <span id="total-price">120.000 đ</span></h5>
-                <button type="submit" class="btn btn-primary " id="confirm-button">Xác nhận đặt sân</button>
-            </div>
+            <button class="btn-primary-order">Đặt sân</button>
         </div>
     </div>
 </div>
 
-<script>
-    document.getElementById('confirm-button').onclick = function () {
-        window.location.href = 'index.php?orderconfirm'; // Chuyển đến trang xác nhận
-    };
-
-    function removeItem(button) {
-        const listItem = button.closest('.list-group-item');
-        listItem.remove();
-        // Cập nhật tổng tiền nếu cần
-    }
-
-    function selectCourt(button) {
-        const dateInput = document.getElementById('date');
-
-        // Kiểm tra xem ngày đã được chọn chưa
-        if (!dateInput.value) {
-            alert("Vui lòng chọn Ngày.");
-            return;
-        }
-        button.classList.add('selected');
-    }
-
-    function selectTime(timeSlot) {
-        const dateInput = document.getElementById('date');
-        selectedCourt = document.querySelector('.field-button.selected');
-        if (!dateInput.value) {
-            alert("Vui lòng chọn Ngày và Sân.");
-            return;
-        }
-        if (!selectedCourt) {
-            alert("Vui lòng chọn Sân.");
-            return;
-        }
-        timeSlot.classList.add('selected');
-    }
-</script>
-
-<!-- Footer Start -->
-<?php include("../layout/footer.php") ?>
+<?php include("../layout/footer.php"); ?>
