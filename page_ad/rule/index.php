@@ -15,34 +15,42 @@ $result = mysqli_query($conn, $query);
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
     $maChinhSach = intval($_POST['maChinhSach']);
     $ten = mysqli_real_escape_string($conn, $_POST['ten']);
-    $noiDung = mysqli_real_escape_string($conn, nl2br($_POST['noiDung'])); // Sử dụng nl2br
+    $noiDung = mysqli_real_escape_string($conn, $_POST['noiDung']);
 
-    $query = "UPDATE chinhsach 
-              SET ten = '$ten', 
-                  noiDung = '$noiDung'
-              WHERE maChinhSach = $maChinhSach";
-
-    if (mysqli_query($conn, $query)) {
-        echo "<script>alert('Cập nhật thành công!');</script>";
-        header("Location: index_ad.php?rule");
-        exit(); // Load lại trang
+    if (empty($ten) || empty($noiDung)) {
+        echo "<script>alert('Tên và nội dung không được để trống!');</script>";
     } else {
-        echo "<script>alert('Lỗi cập nhật!');</script>";
+        $query = "UPDATE chinhsach 
+                  SET ten = '$ten', 
+                      noiDung = '$noiDung'
+                  WHERE maChinhSach = $maChinhSach";
+
+        if (mysqli_query($conn, $query)) {
+            echo "<script>alert('Cập nhật thành công!');</script>";
+            header("Location: index_ad.php?rule");
+            exit();
+        } else {
+            echo "<script>alert('Lỗi cập nhật!');</script>";
+        }
     }
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
     $ten = mysqli_real_escape_string($conn, $_POST['ten']);
-    $noiDung = mysqli_real_escape_string($conn, nl2br($_POST['noiDung'])); // Sử dụng nl2br
+    $noiDung = mysqli_real_escape_string($conn, $_POST['noiDung']);
 
-    $query = "INSERT INTO chinhsach (ten, noiDung) 
-              VALUES ('$ten', '$noiDung')";
-
-    if (mysqli_query($conn, $query)) {
-        header("Location: index_ad.php?rule");
-        exit();
+    if (empty($ten) || empty($noiDung)) {
+        echo "<script>alert('Tên và nội dung không được để trống!');</script>";
     } else {
-        echo "<script>alert('Lỗi thêm chính sách!');</script>";
+        $query = "INSERT INTO chinhsach (ten, noiDung) 
+                  VALUES ('$ten', '$noiDung')";
+
+        if (mysqli_query($conn, $query)) {
+            header("Location: index_ad.php?rule");
+            exit();
+        } else {
+            echo "<script>alert('Lỗi thêm chính sách!');</script>";
+        }
     }
 }
 
@@ -71,49 +79,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.4s;
-            border-radius: 20px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 14px;
-            width: 14px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
-        }
-
-        input:checked+.slider {
-            background-color: #28a745;
-        }
-
-        input:checked+.slider:before {
-            transform: translateX(14px);
-
-
-        }
-
         .policy-content {
             max-width: 800px;
-            max-height: 200px;
-            overflow-y: auto;
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-            white-space: normal;
+            max-height: 120px;
+            /* Tối đa chiều cao cho 5 hàng */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             line-height: 1.5;
             text-align: justify;
+            color: #495057;
+        }
+
+        .policy-content p {
+            margin: 0;
+            padding: 0.5em 0;
+            /* Khoảng cách giữa các đoạn */
+        }
+
+        .modal-lg {
+            max-width: 90%;
+        }
+
+        .textarea-large {
+            height: 300px;
+        }
+
+        .btn-icon {
+            font-size: 1rem;
+            /* Tăng kích thước icon */
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            /* Giữ nút lưu bên phải */
         }
     </style>
 </head>
@@ -131,11 +131,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                 </ol>
                 <h6 class="font-weight-bolder mb-0">Chính Sách</h6>
             </nav>
-
         </div>
     </nav>
 
-    <!-- End Navbar -->
     <div class="container-fluid py-4">
         <div class="row">
             <div class="col-12">
@@ -149,7 +147,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                     <div class="card-body px-0 pb-2">
                         <div class="table-responsive p-3">
                             <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addModal"><i
-                                    class='fa fa-add'></i>Thêm
+                                    class='fa fa-add'></i> Thêm
                             </button>
                             <table class="table align-items-center mb-0">
                                 <thead>
@@ -157,7 +155,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                                         <th style="width: 5%;"
                                             class="text-uppercase text-secondary font-weight-bolder opacity-75 text-start">
                                             TÊN CHÍNH SÁCH</th>
-                                        <th style="width: 95%;"
+                                        <th style="width: 90%;"
                                             class="text-uppercase text-secondary font-weight-bolder opacity-75 text-start">
                                             NỘI DUNG CHÍNH SÁCH</th>
                                         <th class="text-uppercase text-secondary font-weight-bolder opacity-75"></th>
@@ -167,13 +165,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                                     <?php
                                     if (mysqli_num_rows($result) > 0) {
                                         while ($row = mysqli_fetch_assoc($result)) {
+                                            // Nếu nội dung dài hơn 5 hàng, hiển thị "..."
+                                            $shortContent = $row['noiDung'];
+                                            if (substr_count($shortContent, "\n") > 4) {
+                                                $shortContent = implode('<p>', array_slice(explode("\n", $shortContent), 0, 5)) . '...</p>';
+                                            }
                                             echo "<tr class='text-center'>
                                                     <td class='text-start'><h6>{$row['ten']}</h6></td>
-                                                    <td class='text-start text-wrap policy-content'>{$row['noiDung']}</td>
+                                                    <td class='text-start text-wrap policy-content'>{$shortContent}</td>
                                                     <td>
                                                         <a data-toggle='modal'
                                                            data-target='#editModal'
-                                                           class='btn btn-sm btn-warning edit-btn' 
+                                                           class='btn btn-warning edit-btn btn-icon' 
                                                            data-id='{$row['maChinhSach']}' 
                                                            data-ten='{$row['ten']}' 
                                                            data-noidung='{$row['noiDung']}'>
@@ -181,7 +184,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                                                         </a>
                                                         <form method='POST' style='display:inline;'>
                                                             <input type='hidden' name='maChinhSach' value='{$row['maChinhSach']}'>
-                                                            <button type='submit' name='delete' class='btn btn-danger btn-sm' onclick='return confirm(\"Bạn có chắc chắn muốn xóa Chính sách này?\");'>
+                                                            <button type='submit' name='delete' class='btn btn-danger btn-icon' onclick='return confirm(\"Bạn có chắc chắn muốn xóa Chính sách này?\");'>
                                                                 <i class='fa fa-trash'></i>
                                                             </button>
                                                         </form>
@@ -189,14 +192,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                                                 </tr>";
                                         }
                                     } else {
-                                        echo "<tr><td colspan='6' class='text-muted'>Không có chính sách nào.</td></tr>";
+                                        echo "<tr><td colspan='3' class='text-muted'>Không có chính sách nào.</td></tr>";
                                     }
                                     ?>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -216,7 +218,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
 
     <!-- Modal sửa chính sách -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editModalLabel">Sửa Chính Sách</h5>
@@ -231,9 +233,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Nội Dung</label>
-                            <textarea class="form-control" id="noiDung" name="noiDung" required></textarea>
+                            <textarea class="form-control textarea-large" id="noiDung" name="noiDung"
+                                required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary" name="update">Lưu</button>
+                        <div class="modal-footer">
+                            <button type="submit" name="update" class="btn btn-primary">Lưu</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -242,7 +247,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
 
     <!-- Modal thêm chính sách -->
     <div class="modal fade" id="addModal">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Thêm Chính Sách</h5>
@@ -251,7 +256,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                 <form method="POST">
                     <div class="modal-body">
                         <input type="text" name="ten" class="form-control mb-2" placeholder="Tên" required>
-                        <textarea name="noiDung" class="form-control mb-2" placeholder="Nội dung" required></textarea>
+                        <textarea name="noiDung" class="form-control textarea-large mb-2" placeholder="Nội dung"
+                            required></textarea>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" name="add" class="btn btn-primary">Thêm</button>
@@ -261,9 +267,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
         </div>
     </div>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
