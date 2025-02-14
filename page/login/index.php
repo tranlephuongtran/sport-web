@@ -54,26 +54,8 @@ if (isset($_POST['btnLogin'])) {
 }
 ?>
 
-
-<script>
-    function validateLoginForm() {
-        const email = document.getElementById('login-username').value;
-        const password = document.getElementById('login-password').value;
-        const emailPattern = /^[a-zA-Z0-9._%+-]+@(gmail\.com|edu\.vn|yahoo\.com|hotmail\.com|outlook\.com|example\.com)$/;
-        const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-        if (!emailPattern.test(email)) {
-            alert('Vui lòng nhập email hợp lệ (ví dụ: user@gmail.com).');
-            return false;
-        }
-
-
-
-        return true; // Valid inputs
-    }
-</script>
-
 <body>
+
     <div class="video-wrapper">
         <video src="layout/img/loginvid.mp4" autoplay loop muted></video>
     </div>
@@ -82,23 +64,52 @@ if (isset($_POST['btnLogin'])) {
             <h1 class="form-heading">Đăng Nhập</h1>
             <div class="form-group">
                 <i class="fa-regular fa-user"></i>
-                <input type="email" name="CustomerEmail" class="form-input" placeholder="Email" id="login-username"
-                    required>
+                <input type="email" name="CustomerEmail" class="form-input" placeholder="Email" id="login-username">
             </div>
             <div class="form-group">
                 <i class="fa-solid fa-key"></i>
                 <input type="password" name="CustomerPassword" class="form-input" placeholder="Mật khẩu"
-                    id="login-password" required>
+                    id="login-password">
                 <div class="eye">
-                    <i class="far fa-eye"></i>
+                    <i class="far fa-eye-slash"></i>
                 </div>
             </div>
             <a href="index.php?register" id="link-login">Đăng ký tài khoản!</a>
             <input type="submit" name="btnLogin" value="Đăng nhập" class="form-submit">
         </form>
     </div>
+
 </body>
 <script src="../../layout/js/jquery-3.7.1.min.js"></script>
-<script src="../../layout/js/eye.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const eyeIcon = document.querySelector(".eye");
+        const passwordInput = document.getElementById("login-password");
+
+        eyeIcon.addEventListener("click", function () {
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                eyeIcon.children[0].classList.remove("fa-eye-slash");
+                eyeIcon.children[0].classList.add("fa-eye");
+            } else {
+                passwordInput.type = "password";
+                eyeIcon.children[0].classList.remove("fa-eye");
+                eyeIcon.children[0].classList.add("fa-eye-slash");
+            }
+        });
+    });
+    // Hàm kiểm tra form đăng nhập
+    document.getElementById("form-login").addEventListener("submit", function (event) {
+        const emailInput = document.querySelector("input[name='CustomerEmail']");
+        const passwordInput = document.querySelector("input[name='CustomerPassword']");
+
+        if (!emailInput.value.trim() || !passwordInput.value.trim()) {
+            alert("Vui lòng nhập đầy đủ email và mật khẩu!");
+            event.preventDefault();
+        }
+    });
+
+</script>
+
 
 </html>
