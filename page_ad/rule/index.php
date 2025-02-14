@@ -145,9 +145,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                     </div>
 
                     <div class="card-body px-0 pb-2">
-                        <div class="table-responsive p-3">
+                        <div class="table-responsive p-3" align="right">
                             <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addModal"><i
-                                    class='fa fa-add'></i> Thêm
+                                    class='fa fa-add'></i> Thêm mới
                             </button>
                             <table class="table align-items-center mb-0">
                                 <thead>
