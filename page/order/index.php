@@ -474,10 +474,12 @@ $total_price = $booking['total_price'] ?? 0;
                         </li>
                     </ul>
                 </div>
-                <button class="btn-primary-order">Đặt sân</button>
+                <button class="btn-primary-order" onclick="window.location.href='index.php?orderconfirm'">Đặt
+                    sân</button>
             </div>
         </div>
     </div>
 </div>
 
-<?php include("../layout/footer.php"); ?>
+<?php
+include("../layout/footer.php"); ?>
