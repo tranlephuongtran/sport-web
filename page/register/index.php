@@ -5,6 +5,11 @@ if (!$conn) {
     die("Kết nối thất bại: " . mysqli_connect_error());
 }
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require 'vendor/autoload.php';
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $password = mysqli_real_escape_string($conn, $_POST['password']);
@@ -12,68 +17,83 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = mysqli_real_escape_string($conn, $_POST['name']);
     $phone = mysqli_real_escape_string($conn, $_POST['phone']);
 
-    // Email validation
+    // Kiểm tra dữ liệu
     if (!preg_match("/^[^\s@]+@[^\s@]+\.[^\s@]+$/", $email)) {
-        echo "<script>alert('Email không hợp lệ.');setTimeout(function () {
-            window.history.back(); }, 1000);</script>";
+        echo "<script>alert('Email không hợp lệ.');setTimeout(function () { window.history.back(); }, 1000);</script>";
         exit;
     }
 
-    // Password validation
-    if (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/", $password)) {
-        echo "<script>alert('Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.');setTimeout(function () {
-            window.history.back(); }, 1000);</script>";
-        exit;
-    }
-
-    // Confirm password check
     if ($password !== $confirmPassword) {
-        echo "<script>alert('Mật khẩu không khớp.');setTimeout(function () {
-            window.history.back(); }, 1000);</script>";
+        echo "<script>alert('Mật khẩu không khớp.');setTimeout(function () { window.history.back(); }, 1000);</script>";
         exit;
     }
 
-    // Phone number validation
-    if (!preg_match("/^(03|07|09|08)\d{8}$/", $phone)) {
-        echo "<script>alert('Số điện thoại không hợp lệ.');setTimeout(function () {
-            window.history.back(); }, 1000);</script>";
-        exit;
-    }
-
-    // Check for existing email
+    // Kiểm tra email và số điện thoại đã tồn tại
     $emailCheck = "SELECT * FROM taikhoan WHERE email = '$email'";
-    $emailResult = mysqli_query($conn, $emailCheck);
-    if (mysqli_num_rows($emailResult) > 0) {
-        echo "<script>alert('Email đã được sử dụng.');setTimeout(function () {
-            window.history.back(); }, 1000);</script>";
+    if (mysqli_num_rows(mysqli_query($conn, $emailCheck)) > 0) {
+        echo "<script>alert('Email đã được sử dụng.');setTimeout(function () { window.history.back(); }, 1000);</script>";
         exit;
     }
 
-    // Check for existing phone number
     $phoneCheck = "SELECT * FROM nguoidung WHERE sdt = '$phone'";
-    $phoneResult = mysqli_query($conn, $phoneCheck);
-    if (mysqli_num_rows($phoneResult) > 0) {
-        echo "<script>alert('Số điện thoại đã được sử dụng.');setTimeout(function () {
-            window.history.back(); }, 1000);</script>";
+    if (mysqli_num_rows(mysqli_query($conn, $phoneCheck)) > 0) {
+        echo "<script>alert('Số điện thoại đã được sử dụng.');setTimeout(function () { window.history.back(); }, 1000);</script>";
         exit;
     }
 
+    // Tạo mã xác thực ngẫu nhiên 6 số
+    $verificationCode = rand(100000, 999999);
+
+    // Lưu thông tin tài khoản và mã xác thực vào cơ sở dữ liệu
     $maRole = 3;
-
-    $query = "INSERT INTO taikhoan (email, password, maRole) VALUES ('$email', '$password', '$maRole')";
+    // Lưu thông tin tài khoản và mã xác thực vào cơ sở dữ liệu
+    $query = "INSERT INTO taikhoan (email, password, maRole, verification_code) VALUES ('$email', '$password', '$maRole', '$verificationCode')";
     if (mysqli_query($conn, $query)) {
-        $maTK = mysqli_insert_id($conn);
+        $maTK = mysqli_insert_id($conn); // Lấy ID của tài khoản vừa tạo
 
+        // Lưu thông tin người dùng vào bảng nguoidung
         $queryNguoiDung = "INSERT INTO nguoidung (maTK, ten, sdt) VALUES ('$maTK', '$name', '$phone')";
-        if (mysqli_query($conn, $queryNguoiDung)) {
-            $maNguoiDung = mysqli_insert_id($conn);
-            $queryKhachHang = "INSERT INTO khachhang (maNguoiDung) VALUES ('$maNguoiDung')";
-            mysqli_query($conn, $queryKhachHang);
-            echo "<script>alert('Đăng ký thành công!');
-            window.location.href = 'index.php?login'</script>";
+        mysqli_query($conn, $queryNguoiDung);
+
+        // Lưu thông tin khách hàng vào bảng khachhang (thêm câu lệnh này)
+        $queryKhachHang = "INSERT INTO khachhang (maNguoiDung) VALUES ('$maTK')";
+        mysqli_query($conn, $queryKhachHang);
+
+        // Gửi email xác nhận
+        $mail = new PHPMailer(true);
+        try {
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'phamquan100503@gmail.com'; // Thay đổi thành email của bạn
+            $mail->Password = 'egprqwgkmlwgrogb'; // Thay đổi thành password của bạn
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+
+            $mail->setFrom('phamquan100503@gmail.com', 'SportWeb');
+            $mail->addAddress($email, $name);
+
+            $mail->isHTML(true);
+            $mail->Subject = 'Confirm registration - Ace Plus';
+            $mail->Body = "
+            <h1>Cảm ơn bạn đã đăng ký!</h1>
+            <p>Email: <strong>$email</strong></p>
+            <p>Mật khẩu: <strong>$password</strong></p>
+            <p>Mã xác thực của bạn là: <strong>$verificationCode</strong></p>
+            <p>Bạn cần nhập mã xác thực này để kích hoạt tài khoản của mình.</p>
+        ";
+
+            $mail->send();
+
+            // Lưu mã xác thực vào session
+            $_SESSION['verification_email'] = $email;
+            $_SESSION['verification_code'] = $verificationCode;
+
+            // Redirect đến form xác thực
+            echo "<script>window.location.href = 'index.php?verify';</script>";
             exit;
-        } else {
-            echo "<script>alert('Có lỗi xảy ra khi thêm người dùng: " . mysqli_error($conn) . "');</script>";
+        } catch (Exception $e) {
+            echo "<script>alert('Không thể gửi email: {$mail->ErrorInfo}');</script>";
         }
     } else {
         echo "<script>alert('Có lỗi xảy ra khi đăng ký: " . mysqli_error($conn) . "');</script>";
