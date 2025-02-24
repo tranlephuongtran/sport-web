@@ -1,4 +1,12 @@
-<?php include("../layout/header.php"); ?>
+<?php include("../layout/header.php");
+session_start();
+$final_price = $_SESSION['booking']["final_price"] ?? $_SESSION['booking']["total_price"];
+$bookingID = $_SESSION['booking']["order_id"];
+$user = $_SESSION['maKH'];
+// Kết nối database
+$conn = mysqli_connect("localhost", "nhomcnm", "nhomcnm", "sport");
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+?>
 <style>
     .bg-breadcrumb {
         background-color: #007bff;
@@ -54,7 +62,7 @@
 <form method="POST" enctype='multipart/form-data'>
     <div class="container-fluid bg-breadcrumb">
         <div class="container text-center py-5" style="max-width: 900px;">
-            <h4 class="text-white display-4 mb-4 wow fadeInDown" data-wow-delay="0.1s">Thanh Toán</h4>
+            <h4 class="text-white display-4 mb-4 wow fadeInDown" data-wow-delay="0.1s">Thanh Toán </h4>
         </div>
     </div>
     <div class="mt-5">
@@ -81,7 +89,7 @@
                                         <tr>
                                             <td>
                                                 <input class="form-check-input" type="radio" name="paymentMethod"
-                                                    value="momo" id="momo" onchange="updatePaymentInfo('momo')">
+                                                    value="Momo" id="momo" onchange="updatePaymentInfo('momo')">
                                                 <label class="form-check-label" for="momo">
                                                     <img style="width: 40px;height: 40px;margin-left: 20px;margin-right: 30px;"
                                                         src="layout/img/logomomo.png" alt="">Ví Momo
@@ -91,7 +99,7 @@
                                         <tr>
                                             <td>
                                                 <input class="form-check-input" type="radio" name="paymentMethod"
-                                                    value="zalopay" id="zalopay"
+                                                    value="Zalopay" id="zalopay"
                                                     onchange="updatePaymentInfo('zalopay')">
                                                 <label class="form-check-label" for="zalopay">
                                                     <img style="width: 50px;height: 50px;margin-left: 12px;margin-right: 30px;"
@@ -115,12 +123,12 @@
                                         <div class="mb-3">
                                             <label for="amount" class="form-label">Số tiền cần thanh toán</label>
                                             <input type="text" class="form-control" id="amount" readonly
-                                                value="<?php //echo $moneyPay ?> 100.000 đ">
+                                                value="<?php echo number_format($final_price, 0, ',', '.'); ?>đ">
                                         </div>
                                         <div class="mb-3">
                                             <label for="account" class="form-label">Nội dung chuyển khoản</label>
                                             <input type="text" class="form-control" id="account" readonly
-                                                value="THANHTOAN#GOVAP-202502-12<?php //echo $payment ?>">
+                                                value="THANHTOAN-ACEPLUS-<?php echo $bookingID ?>">
                                         </div>
 
                                         <div class="mb-3">
@@ -173,5 +181,124 @@
         updatePaymentInfo('banking');
     }
 </script>
+
+<?php
+if (isset($_POST['btn-submit'])) {
+    $payMethod = $_POST['paymentMethod'];
+    $targetDir = "layout/img/bills/";
+    $fileName = isset($_FILES["billImage"]["name"]) ? basename($_FILES["billImage"]["name"]) : "";
+    $uploadFile = $targetDir . $fileName;
+    $uploadOk = 1;
+    $imageFileType = strtolower(pathinfo($uploadFile, PATHINFO_EXTENSION));
+
+    if (!empty($fileName)) {
+        $check = getimagesize($_FILES["billImage"]["tmp_name"]);
+        if ($check === false) {
+            echo "<script>alert('File không phải là ảnh hợp lệ.');</script>";
+            $uploadOk = 0;
+        }
+        if ($_FILES["billImage"]["size"] > 5000000) {
+            echo "<script>alert('Kích thước ảnh quá lớn (tối đa 5MB).');</script>";
+            $uploadOk = 0;
+        }
+        if (!in_array($imageFileType, ["jpg", "png", "jpeg", "gif"])) {
+            echo "<script>alert('Chỉ cho phép định dạng JPG, PNG, JPEG, GIF.');</script>";
+            $uploadOk = 0;
+        }
+
+        if ($uploadOk && move_uploaded_file($_FILES["billImage"]["tmp_name"], $uploadFile)) {
+            $ngayDat = date('Y-m-d H:i:s');
+            $ngayChoi = $_SESSION['booking']['date'];
+            $tongTien = $_SESSION['booking']['total_price'];
+            $tinhTrang = 'Chờ xác nhận';
+            $phuongThucThanhToan = $payMethod;
+            $tongThanhToan = $final_price;
+            $hinhAnh = $fileName;
+            $maKM = $_SESSION['booking']['discount']['code'] ?? null;
+
+            if (empty($maKM)) {
+                $insertQuery = "
+                INSERT INTO dondatsan(ngayDat, ngayChoi, tongTien, tinhTrang, phuongThucThanhToan, tongThanhToan, hinhAnh, maKH) 
+                VALUES (STR_TO_DATE('$ngayDat', '%Y-%m-%d %H:%i:%s'), 
+                        STR_TO_DATE('$ngayChoi', '%Y-%m-%d'), 
+                        $tongTien, 
+                        '$tinhTrang', 
+                        '$phuongThucThanhToan', 
+                        $tongThanhToan, 
+                        '$hinhAnh', 
+                        $user)";
+            } else {
+                $insertQuery = "
+                INSERT INTO dondatsan(ngayDat, ngayChoi, tongTien, tinhTrang, phuongThucThanhToan, tongThanhToan, hinhAnh, maKM, maKH) 
+                VALUES (STR_TO_DATE('$ngayDat', '%Y-%m-%d %H:%i:%s'), 
+                        STR_TO_DATE('$ngayChoi', '%Y-%m-%d'), 
+                        $tongTien, 
+                        '$tinhTrang', 
+                        '$phuongThucThanhToan', 
+                        $tongThanhToan, 
+                        '$hinhAnh', 
+                        $maKM, 
+                        $user)";
+            }
+
+            if ($conn->query($insertQuery)) {
+                $maDon = $conn->insert_id;
+                echo "Mã đơn: " . $maDon . "<br>";
+
+                echo "<pre>";
+                print_r($_SESSION['booking']['courts']);
+                echo "</pre>";
+
+                $success = true; // Biến kiểm tra thành công
+
+                foreach ($_SESSION['booking']['courts'] as $court_name => $bookings) {
+                    echo "Processing court: " . $court_name . "<br>";
+
+                    $queryMaSan = "SELECT maSan FROM san WHERE tenSan = ?";
+                    $stmt = mysqli_prepare($conn, $queryMaSan);
+                    mysqli_stmt_bind_param($stmt, "s", $court_name);
+                    mysqli_stmt_execute($stmt);
+                    $result = mysqli_stmt_get_result($stmt);
+
+                    if ($row = mysqli_fetch_assoc($result)) {
+                        $maSan = $row['maSan'];
+                        echo "Mã sân: " . $maSan . "<br>";
+
+                        foreach ($bookings as $booking) {
+                            $time = $booking['time'];
+                            $price = $booking['price'];
+                            echo "Time: " . $time . ", Price: " . $price . "<br>";
+
+                            $insertChiTiet = "INSERT INTO chitiethoadon(maDon, maSan, gioChoi, giaSan) 
+                                            VALUES ($maDon, $maSan, '$time', $price)";
+
+                            if (!$conn->query($insertChiTiet)) {
+                                $success = false;
+                                echo "<script>alert('Lỗi khi thêm chi tiết hóa đơn: " . $conn->error . "');</script>";
+                                break 2; // Thoát cả 2 vòng lặp nếu có lỗi
+                            }
+                        }
+                    } else {
+                        $success = false;
+                        echo "<script>alert('Không tìm thấy mã sân cho: " . $court_name . "');</script>";
+                        break;
+                    }
+                }
+
+                if ($success) {
+                    unset($_SESSION['booking']);
+                    echo "<script>alert('Thanh toán thành công! Chờ xác nhận.');window.location.href = 'index.php?home';</script>";
+                }
+            } else {
+                echo "<script>alert('Lỗi khi cập nhật thông tin: " . $conn->error . "');</script>";
+            }
+        } else {
+            echo "<script>alert('Không thể tải ảnh lên. Vui lòng thử lại.');</script>";
+        }
+    } else {
+        echo "<script>alert('Vui lòng tải lên ảnh hóa đơn');</script>";
+    }
+}
+?>
 
 <?php include("../layout/footer.php"); ?>

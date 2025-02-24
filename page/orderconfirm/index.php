@@ -51,6 +51,17 @@ if (isset($_POST['remove_promotion'])) {
 // Lấy danh sách khuyến mãi
 $query = "SELECT * FROM khuyenmai WHERE trangThai = 1";
 $promotions = mysqli_query($conn, $query);
+
+$query = "SELECT maDon FROM dondatsan ORDER BY maDon DESC LIMIT 1";
+$result = mysqli_query($conn, $query);
+if ($row = mysqli_fetch_assoc($result)) {
+    $nextOrderId = $row['maDon'] + 1;
+} else {
+    $nextOrderId = 1; // Nếu chưa có đơn nào
+}
+
+// Lưu mã đơn vào session để sử dụng khi thanh toán
+$_SESSION['booking']['order_id'] = $nextOrderId;
 ?>
 
 <style>
@@ -261,7 +272,7 @@ $promotions = mysqli_query($conn, $query);
             <div class="card">
                 <h4>Thông tin đơn hàng</h4>
                 <div class="order-info">
-                    <p>Mã đơn: <strong>#<?php echo "GOVAP-" . date('ymd') . "-" . rand(10, 99); ?></strong></p>
+                    <p>Mã đơn: <strong>#<?php echo $nextOrderId; ?></strong></p>
                     <p>Ngày đặt: <strong><?php echo date('d/m/Y'); ?></strong></p>
                     <p>Ngày chơi: <strong><?php echo date('d/m/Y', strtotime($date)); ?></strong></p>
                 </div>

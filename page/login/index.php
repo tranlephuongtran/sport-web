@@ -39,6 +39,7 @@ if (isset($_POST['btnLogin'])) {
     if ($user = mysqli_fetch_assoc($result)) {
         if ($password === $user['password']) {
             $_SESSION['login'] = $user['maNguoiDung'];
+            $_SESSION['maKH'] = $user['maKH'];
             echo '<script>
                 alert("Đăng nhập thành công");
                 window.location.href = "index.php?home";
