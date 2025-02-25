@@ -243,54 +243,75 @@ if (isset($_POST['btn-submit'])) {
 
             if ($conn->query($insertQuery)) {
                 $maDon = $conn->insert_id;
-                echo "Mã đơn: " . $maDon . "<br>";
 
-                echo "<pre>";
-                print_r($_SESSION['booking']['courts']);
-                echo "</pre>";
+                try {
+                    $conn->begin_transaction();
 
-                $success = true; // Biến kiểm tra thành công
+                    foreach ($_SESSION['booking']['courts'] as $court_name => $bookings) {
+                        // Lấy mã sân
+                        $stmt = $conn->prepare("SELECT maSan FROM san WHERE tenSan = ?");
+                        $stmt->bind_param("s", $court_name);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
 
-                foreach ($_SESSION['booking']['courts'] as $court_name => $bookings) {
-                    echo "Processing court: " . $court_name . "<br>";
+                        if ($row = $result->fetch_assoc()) {
+                            $maSan = $row['maSan'];
 
-                    $queryMaSan = "SELECT maSan FROM san WHERE tenSan = ?";
-                    $stmt = mysqli_prepare($conn, $queryMaSan);
-                    mysqli_stmt_bind_param($stmt, "s", $court_name);
-                    mysqli_stmt_execute($stmt);
-                    $result = mysqli_stmt_get_result($stmt);
+                            foreach ($bookings as $booking) {
+                                $time = $booking['time'];
+                                $price = $booking['price'];
 
-                    if ($row = mysqli_fetch_assoc($result)) {
-                        $maSan = $row['maSan'];
-                        echo "Mã sân: " . $maSan . "<br>";
+                                echo "Inserting: maDon=$maDon, maSan=$maSan, time=$time, price=$price<br>";
 
-                        foreach ($bookings as $booking) {
-                            $time = $booking['time'];
-                            $price = $booking['price'];
-                            echo "Time: " . $time . ", Price: " . $price . "<br>";
+                                // Insert chitiethoadon với khóa chính mới
+                                $sqlChiTiet = "INSERT INTO chitiethoadon (maDon, maSan, gioChoi, giaSan) 
+                                              VALUES (?, ?, ?, ?)
+                                              ON DUPLICATE KEY UPDATE giaSan = VALUES(giaSan)";
 
-                            $insertChiTiet = "INSERT INTO chitiethoadon(maDon, maSan, gioChoi, giaSan) 
-                                            VALUES ($maDon, $maSan, '$time', $price)";
+                                $stmtChiTiet = $conn->prepare($sqlChiTiet);
+                                if (!$stmtChiTiet) {
+                                    throw new Exception("Prepare chitiethoadon failed: " . $conn->error);
+                                }
 
-                            if (!$conn->query($insertChiTiet)) {
-                                $success = false;
-                                echo "<script>alert('Lỗi khi thêm chi tiết hóa đơn: " . $conn->error . "');</script>";
-                                break 2; // Thoát cả 2 vòng lặp nếu có lỗi
+                                $stmtChiTiet->bind_param("iisi", $maDon, $maSan, $time, $price);
+                                if (!$stmtChiTiet->execute()) {
+                                    throw new Exception("Insert chitiethoadon failed: " . $stmtChiTiet->error);
+                                }
+
+                                // Insert tinhtrangsan
+                                $sqlTinhTrang = "INSERT INTO tinhtrangsan (maSan, khungGio, tinhTrang, ngayDat) 
+                                                VALUES (?, ?, 1, ?)
+                                                ON DUPLICATE KEY UPDATE tinhTrang = 1";
+
+                                $stmtTinhTrang = $conn->prepare($sqlTinhTrang);
+                                if (!$stmtTinhTrang) {
+                                    throw new Exception("Prepare tinhtrangsan failed: " . $conn->error);
+                                }
+
+                                $stmtTinhTrang->bind_param("iss", $maSan, $time, $ngayChoi);
+                                if (!$stmtTinhTrang->execute()) {
+                                    throw new Exception("Insert tinhtrangsan failed: " . $stmtTinhTrang->error);
+                                }
                             }
+                        } else {
+                            throw new Exception("Không tìm thấy mã sân: $court_name");
                         }
-                    } else {
-                        $success = false;
-                        echo "<script>alert('Không tìm thấy mã sân cho: " . $court_name . "');</script>";
-                        break;
                     }
-                }
 
-                if ($success) {
+                    $conn->commit();
                     unset($_SESSION['booking']);
                     echo "<script>alert('Thanh toán thành công! Chờ xác nhận.');window.location.href = 'index.php?home';</script>";
+
+                } catch (Exception $e) {
+                    $conn->rollback();
+                    echo "<script>alert('Lỗi: " . $e->getMessage() . "');</script>";
+
+                    // Debug error details
+                    echo "<pre>Error details:\n";
+                    echo $e->getMessage() . "\n";
+                    echo $e->getTraceAsString() . "\n";
+                    echo "</pre>";
                 }
-            } else {
-                echo "<script>alert('Lỗi khi cập nhật thông tin: " . $conn->error . "');</script>";
             }
         } else {
             echo "<script>alert('Không thể tải ảnh lên. Vui lòng thử lại.');</script>";

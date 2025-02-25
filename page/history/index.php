@@ -9,7 +9,11 @@ $user = $_SESSION['login'];
 $str = "SELECT 
     dds.maDon, dds.ngayDat, dds.ngayChoi, 
     GROUP_CONCAT(DISTINCT s.tenSan ORDER BY s.tenSan SEPARATOR '<br>') AS danhSachSan,
-    REPLACE(GROUP_CONCAT(DISTINCT cthd.gioChoi ORDER BY cthd.gioChoi SEPARATOR ', '), ', ', '<br>') AS danhSachGioChoi,
+    GROUP_CONCAT(
+        CONCAT(cthd.gioChoi, ' (', FORMAT(cthd.giaSan, 0), ' đ)')
+        ORDER BY cthd.gioChoi 
+        SEPARATOR '<br>'
+    ) AS danhSachGioChoiVaGia,
     dds.tongTien, km.giaGiam, dds.tongThanhToan, dds.tinhTrang
 FROM dondatsan dds
 LEFT JOIN chitiethoadon cthd ON dds.maDon = cthd.maDon 
@@ -17,9 +21,7 @@ LEFT JOIN khachhang kh ON dds.maKH = kh.maKH
 LEFT JOIN san s ON cthd.maSan = s.maSan
 LEFT JOIN khuyenmai km ON dds.maKM = km.maKM
 WHERE kh.maNguoiDung = $user
-GROUP BY dds.maDon;
-
-";
+GROUP BY dds.maDon;";
 
 $result = $conn->query($str);
 ?>
@@ -242,31 +244,30 @@ $result = $conn->query($str);
                         }
 
                         echo "<tr>
-                                <td><b>{$row['maDon']}</b></td>
-                                <td>{$row['ngayDat']}</td>
-                                <td>{$row['ngayChoi']}</td>
-                                <td>{$row['danhSachSan']}</td>
-                                <td>{$row['danhSachGioChoi']}</td>
-                                <td>" . number_format($row['tongTien'], 0, '.', '.') . "</td>
-                                <td>" . number_format($row['giaGiam'], 0, '.', '.') . "</td>
-                                <td>" . number_format($row['tongThanhToan'], 0, '.', '.') . "</td>
-                                <td class='{$statusClass}'>{$row['tinhTrang']}</td>
-                                <td> 
-                                <button type='button' class='open-modal-btn btn-detail' 
-                                    data-maDon='{$row['maDon']}'
-                                    data-ngayDat='{$row['ngayDat']}'
-                                    data-ngayChoi='{$row['ngayChoi']}'
-                                    data-danhSachSan='{$row['danhSachSan']}'
-                                    data-danhSachGioChoi='{$row['danhSachGioChoi']}'
-                                    data-tongTien='{$row['tongTien']}'
-                                    data-giaGiam='{$row['giaGiam']}'
-                                    data-tongThanhToan='{$row['tongThanhToan']}'
-                                    data-tinhTrang='{$row['tinhTrang']}'
-                                    onclick='openModal(this)'>Chi tiết
-                                </button> 
-                            </td>
-
-                                </tr>";
+    <td><b>{$row['maDon']}</b></td>
+    <td>{$row['ngayDat']}</td>
+    <td>{$row['ngayChoi']}</td>
+    <td>{$row['danhSachSan']}</td>
+    <td>{$row['danhSachGioChoiVaGia']}</td>
+    <td>" . number_format($row['tongTien'], 0, '.', '.') . "</td>
+    <td>" . number_format($row['giaGiam'], 0, '.', '.') . "</td>
+    <td>" . number_format($row['tongThanhToan'], 0, '.', '.') . "</td>
+    <td class='{$statusClass}'>{$row['tinhTrang']}</td>
+    <td> 
+        <button type='button' class='open-modal-btn btn-detail' 
+            data-maDon='{$row['maDon']}'
+            data-ngayDat='{$row['ngayDat']}'
+            data-ngayChoi='{$row['ngayChoi']}'
+            data-danhSachSan='{$row['danhSachSan']}'
+            data-danhSachGioChoi='{$row['danhSachGioChoiVaGia']}'
+            data-tongTien='{$row['tongTien']}'
+            data-giaGiam='{$row['giaGiam']}'
+            data-tongThanhToan='{$row['tongThanhToan']}'
+            data-tinhTrang='{$row['tinhTrang']}'
+            onclick='openModal(this)'>Chi tiết
+        </button> 
+    </td>
+</tr>";
                     }
 
                 }
@@ -293,15 +294,13 @@ $result = $conn->query($str);
                             <thead>
                                 <tr>
                                     <th>Tên sân</th>
-                                    <th>Thời gian</th>
-                                    <th>T.Tiền</th>
+                                    <th>Thời gian và giá</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td><span id="modal-danhSachSan"></span></td>
-                                    <td><span id="modal-danhSachGioChoi"></span> (20.000 đ)</td>
-                                    <td>40.000đ</td>
+                                    <td><span id="modal-danhSachGioChoi"></span></td>
                                 </tr>
                             </tbody>
                         </table>
