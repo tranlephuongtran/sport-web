@@ -7,20 +7,37 @@ if (!$conn) {
   die("Kết nối CSDL thất bại: " . mysqli_connect_error());
 }
 
-// Cập nhật tình trạng đơn hàng
-if (isset($_GET['update_maDon'])) {
+// Cập nhật trạng thái đơn hàng
+if (isset($_GET['update_maDon']) && isset($_GET['current_status'])) {
   $maDon = mysqli_real_escape_string($conn, $_GET['update_maDon']);
-  $updateQuery = "UPDATE dondatsan SET tinhTrang = 'Hoàn thành' WHERE maDon = '$maDon' AND tinhTrang = 'Đang xử lý'";
-  mysqli_query($conn, $updateQuery);
+  $currentStatus = mysqli_real_escape_string($conn, $_GET['current_status']);
+
+  // Lấy thông tin đơn hàng
+  $orderQuery = "SELECT hinhAnh, tinhTrang FROM dondatsan WHERE maDon = '$maDon'";
+  $orderResult = mysqli_query($conn, $orderQuery);
+  $orderData = mysqli_fetch_assoc($orderResult);
+
+  if ($orderData) {
+    $imageExists = !empty($orderData['hinhAnh']);
+
+    // Chỉ cập nhật nếu điều kiện đúng
+    if ($currentStatus == 'Chờ xác nhận' && $imageExists) {
+      $updateQuery = "UPDATE dondatsan SET tinhTrang = 'Đã thanh toán' WHERE maDon = '$maDon'";
+      mysqli_query($conn, $updateQuery);
+    } elseif ($currentStatus == 'Đã thanh toán') {
+      $updateQuery = "UPDATE dondatsan SET tinhTrang = 'Hoàn thành' WHERE maDon = '$maDon'";
+      mysqli_query($conn, $updateQuery);
+    }
+  }
 }
 
-// Lấy giá trị lọc từ request (nếu có)
+// Lọc tìm kiếm
 $tinhTrangFilter = isset($_GET['tinhTrang']) ? $_GET['tinhTrang'] : 'Tất cả';
 $searchKeyword = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
 
-// Truy vấn để lấy dữ liệu hóa đơn có lọc
+// Truy vấn danh sách đơn hàng
 $query = "
-    SELECT 
+    SELECT DISTINCT 
         d.maDon, 
         d.ngayDat, 
         d.ngayChoi, 
@@ -58,59 +75,27 @@ $result = mysqli_query($conn, $query);
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
-    function updateTinhTrang(maDon) {
+    function updateTinhTrang(maDon, currentStatus) {
       if (confirm("Bạn có chắc chắn muốn cập nhật tình trạng đơn hàng này?")) {
-        window.location.href = "?update_maDon=" + maDon;
+        window.location.href = "?update_maDon=" + maDon + "&current_status=" + currentStatus;
       }
     }
-    function showImage(src) {
-      document.getElementById("modalImage").src = src;
-      var myModal = new bootstrap.Modal(document.getElementById('imageModal'));
-      myModal.show();
-    }
   </script>
-
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <!-- jQuery & Bootstrap JS -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
-
 </head>
-<!-- Modal hiển thị ảnh -->
-<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Xem Ảnh</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center">
-        <img id="modalImage" src="" class="img-fluid" alt="Ảnh hóa đơn">
-      </div>
-    </div>
-  </div>
-</div>
 
 <body>
-  <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur"
-    navbar-scroll="true">
+  <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl">
     <div class="container-fluid py-1 px-3">
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-          <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a>
-          </li>
+          <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li>
           <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Hóa Đơn</li>
         </ol>
         <h6 class="font-weight-bolder mb-0">Hóa Đơn</h6>
       </nav>
-      <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
+      <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4">
         <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-
           <form method="GET" class="input-group input-group-outline">
-
             <input type="text" name="search" class="form-control" placeholder="Tìm Kiếm Theo Mã Đơn..."
               value="<?= htmlspecialchars($searchKeyword) ?>">
           </form>
@@ -118,6 +103,7 @@ $result = mysqli_query($conn, $query);
       </div>
     </div>
   </nav>
+
   <div class="container-fluid py-4">
     <div class="row">
       <div class="col-12">
@@ -129,11 +115,14 @@ $result = mysqli_query($conn, $query);
           </div>
 
           <div class="card-body px-0">
-            <div class=" p-3 col-2">
+            <div class="p-3 col-2">
               <form method="GET">
-                <select name="tinhTrang" id="tinhTrang" class="form-select" onchange="this.form.submit()">
+                <select name="tinhTrang" class="form-select" onchange="this.form.submit()">
                   <option value="Tất cả" <?= $tinhTrangFilter == 'Tất cả' ? 'selected' : '' ?>>Tất cả</option>
-                  <option value="Đang xử lý" <?= $tinhTrangFilter == 'Đang xử lý' ? 'selected' : '' ?>>Đang xử lý</option>
+                  <option value="Chờ xác nhận" <?= $tinhTrangFilter == 'Chờ xác nhận' ? 'selected' : '' ?>>Chờ xác nhận
+                  </option>
+                  <option value="Đã thanh toán" <?= $tinhTrangFilter == 'Đã thanh toán' ? 'selected' : '' ?>>Đã thanh toán
+                  </option>
                   <option value="Hoàn thành" <?= $tinhTrangFilter == 'Hoàn thành' ? 'selected' : '' ?>>Hoàn thành</option>
                 </select>
               </form>
@@ -154,28 +143,23 @@ $result = mysqli_query($conn, $query);
                 </thead>
                 <tbody>
                   <?php
-                  if (mysqli_num_rows($result) > 0) {
-                    while ($row = mysqli_fetch_assoc($result)) {
-                      $statusColor = ($row['tinhTrang'] == 'Hoàn thành') ? 'text-success' : (($row['tinhTrang'] == 'Đang xử lý') ? 'text-danger' : '');
-                      $updateLink = ($row['tinhTrang'] == 'Đang xử lý') ? " onclick='updateTinhTrang({$row['maDon']})' style='cursor:pointer; color:blue; text-decoration:underline;'" : "";
-                      echo "<tr class='text-center'>
-                                <td {$updateLink}>{$row['maDon']}</td>
-                                <td>{$row['ngayDat']}</td>
-                                <td>{$row['ngayChoi']}</td>
-                                <td class='text-primary fw-bold'>" . number_format($row['tongTien'], 0, ',', '.') . " VND</td>
-                                <td class='{$statusColor} fw-bold'>{$row['tinhTrang']}</td>
-                                <td>{$row['phuongThucThanhToan']}</td>
-                                <td>
-                    <a href='layout/img/bills/{$row['hinhAnh']}' data-lightbox='image-{$row['maDon']}' data-title='Mã Đơn: {$row['maDon']}'>
-                        <img src='layout/img/bills/{$row['hinhAnh']}' alt='Hình ảnh' style='width: 100px; height: 100px;'>
-                    </a>
-                </td>
+                  while ($row = mysqli_fetch_assoc($result)) {
+                    $statusColor = $row['tinhTrang'] == 'Hoàn thành' ? 'text-success' :
+                      ($row['tinhTrang'] == 'Đã thanh toán' ? 'text-warning' : 'text-danger');
 
+                    $updateLink = ($row['tinhTrang'] == 'Chờ xác nhận' && !empty($row['hinhAnh'])) ||
+                      ($row['tinhTrang'] == 'Đã thanh toán') ?
+                      " onclick='updateTinhTrang({$row['maDon']}, \"{$row['tinhTrang']}\")' style='cursor:pointer; color:blue; text-decoration:underline;'" : "";
 
-                              </tr>";
-                    }
-                  } else {
-                    echo "<tr><td colspan='7' class='text-center'>Không có hóa đơn nào.</td></tr>";
+                    echo "<tr class='text-center'>
+                            <td {$updateLink}>{$row['maDon']}</td>
+                            <td>{$row['ngayDat']}</td>
+                            <td>{$row['ngayChoi']}</td>
+                            <td class='text-primary fw-bold'>" . number_format($row['tongTien'], 0, ',', '.') . " VND</td>
+                            <td class='{$statusColor} fw-bold'>{$row['tinhTrang']}</td>
+                            <td>{$row['phuongThucThanhToan']}</td>
+                            <td><img src='layout/img/bills/{$row['hinhAnh']}' alt='Hóa đơn' width='100'></td>
+                          </tr>";
                   }
                   ?>
                 </tbody>
@@ -186,7 +170,6 @@ $result = mysqli_query($conn, $query);
       </div>
     </div>
   </div>
-
 
 </body>
 
