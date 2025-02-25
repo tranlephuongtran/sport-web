@@ -6,34 +6,70 @@ if (!isset($_GET['history'])) {
 }
 $conn = mysqli_connect("localhost", "nhomcnm", "nhomcnm", "sport");
 $user = $_SESSION['login'];
+
+// Thực hiện truy vấn TRƯỚC khi xử lý dữ liệu
 $str = "SELECT 
-    dds.maDon, dds.ngayDat, dds.ngayChoi, 
-    GROUP_CONCAT(DISTINCT s.tenSan ORDER BY s.tenSan SEPARATOR '<br>') AS danhSachSan,
+    dds.maDon, 
+    dds.ngayDat, 
+    dds.ngayChoi,
+    s.tenSan,
     GROUP_CONCAT(
         CONCAT(cthd.gioChoi, ' (', FORMAT(cthd.giaSan, 0), ' đ)')
         ORDER BY cthd.gioChoi 
         SEPARATOR '<br>'
-    ) AS danhSachGioChoiVaGia,
-    dds.tongTien, km.giaGiam, dds.tongThanhToan, dds.tinhTrang
+    ) AS gioChoiVaGia,
+    dds.tongTien, 
+    km.giaGiam, 
+    dds.tongThanhToan, 
+    dds.tinhTrang
 FROM dondatsan dds
 LEFT JOIN chitiethoadon cthd ON dds.maDon = cthd.maDon 
 LEFT JOIN khachhang kh ON dds.maKH = kh.maKH 
 LEFT JOIN san s ON cthd.maSan = s.maSan
 LEFT JOIN khuyenmai km ON dds.maKM = km.maKM
 WHERE kh.maNguoiDung = $user
-GROUP BY dds.maDon;";
+GROUP BY dds.maDon, s.maSan, s.tenSan
+ORDER BY dds.maDon DESC, s.tenSan;";
 
 $result = $conn->query($str);
+
+if (!$result) {
+    die("Query failed: " . $conn->error);
+}
+
+// Khởi tạo biến để lưu trữ dữ liệu
+$orders = array();
+
+// Xử lý dữ liệu từ kết quả truy vấn
+while ($row = mysqli_fetch_assoc($result)) {
+    $maDon = $row['maDon'];
+
+    if (!isset($orders[$maDon])) {
+        $orders[$maDon] = array(
+            'maDon' => $maDon,
+            'ngayDat' => $row['ngayDat'],
+            'ngayChoi' => $row['ngayChoi'],
+            'tongTien' => $row['tongTien'],
+            'giaGiam' => $row['giaGiam'],
+            'tongThanhToan' => $row['tongThanhToan'],
+            'tinhTrang' => $row['tinhTrang'],
+            'courts' => array()
+        );
+    }
+
+    $orders[$maDon]['courts'][] = array(
+        'tenSan' => $row['tenSan'],
+        'gioChoiVaGia' => $row['gioChoiVaGia']
+    );
+}
 ?>
 
 <style>
-    /* Màu chủ đạo */
     .text-primary {
         color: #004aad !important;
         font-weight: bold;
     }
 
-    /* Bảng có viền bo tròn và màu sắc tinh tế */
     .table {
         border-radius: 8px;
         overflow: hidden;
@@ -46,33 +82,25 @@ $result = $conn->query($str);
         font-weight: bold;
     }
 
-    /* Hiệu ứng hover trên hàng */
     .table-hover tbody tr:hover {
         background-color: #f0f5ff;
     }
 
-    /* Cột trạng thái */
-    /* Trạng thái màu sắc */
     .status-pending {
         color: #ffc107;
-        /* Vàng */
         font-weight: bold;
     }
 
     .status-confirmed {
         color: #007bff;
-        /* Xanh dương */
         font-weight: bold;
     }
 
     .status-completed {
         color: #28a745;
-        /* Xanh lá */
         font-weight: bold;
     }
 
-
-    /* Nút Chi Tiết */
     .btn-detail {
         display: inline-block;
         padding: 6px 14px;
@@ -93,7 +121,6 @@ $result = $conn->query($str);
         font-weight: lighter;
     }
 
-    /* Styling for the invoice */
     .invoice {
         max-width: 600px;
         margin: 20px auto;
@@ -146,11 +173,6 @@ $result = $conn->query($str);
         font-size: 14px;
     }
 
-    .total-section p {
-        font-size: 14px;
-        margin: 5px 0;
-    }
-
     .invoice-footer p {
         font-size: 16px;
         margin: 10px 0;
@@ -162,7 +184,6 @@ $result = $conn->query($str);
         color: #004aad;
     }
 
-    /* Hiệu ứng làm mờ nền */
     .modal {
         display: none;
         position: fixed;
@@ -172,9 +193,7 @@ $result = $conn->query($str);
         width: 100%;
         height: 100%;
         backdrop-filter: blur(5px);
-        /* Làm mờ nền */
         background-color: rgba(0, 0, 0, 0.2);
-        /* Màu nền tối mờ */
     }
 
     .modal-content {
@@ -195,6 +214,24 @@ $result = $conn->query($str);
         color: #333;
         font-size: 20px;
         cursor: pointer;
+    }
+
+    .court-info {
+        margin-bottom: 10px;
+        padding: 5px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .court-info:last-child {
+        border-bottom: none;
+    }
+
+    .court-info strong {
+        color: #004aad;
+    }
+
+    .invoice-table td {
+        vertical-align: top;
     }
 
     @keyframes fadeIn {
@@ -220,8 +257,7 @@ $result = $conn->query($str);
                     <th>Mã đơn</th>
                     <th>Ngày đặt</th>
                     <th>Ngày chơi</th>
-                    <th>Sân chơi</th>
-                    <th>Giờ chơi</th>
+                    <th colspan="2">Thông tin đặt sân</th>
                     <th>Tổng tiền</th>
                     <th>Khuyến mãi</th>
                     <th>Tổng thanh toán</th>
@@ -230,49 +266,42 @@ $result = $conn->query($str);
                 </tr>
             </thead>
             <tbody>
-                <?php
-                if (mysqli_num_rows($result) > 0) {
-                    while ($row = mysqli_fetch_assoc($result)) {
-                        // Xác định lớp CSS theo trạng thái
-                        $statusClass = "";
-                        if ($row['tinhTrang'] == "Chờ xác nhận") {
-                            $statusClass = "status-pending";
-                        } elseif ($row['tinhTrang'] == "Đã xác nhận") {
-                            $statusClass = "status-confirmed";
-                        } elseif ($row['tinhTrang'] == "Hoàn thành") {
-                            $statusClass = "status-completed";
-                        }
-
-                        echo "<tr>
-    <td><b>{$row['maDon']}</b></td>
-    <td>{$row['ngayDat']}</td>
-    <td>{$row['ngayChoi']}</td>
-    <td>{$row['danhSachSan']}</td>
-    <td>{$row['danhSachGioChoiVaGia']}</td>
-    <td>" . number_format($row['tongTien'], 0, '.', '.') . "</td>
-    <td>" . number_format($row['giaGiam'], 0, '.', '.') . "</td>
-    <td>" . number_format($row['tongThanhToan'], 0, '.', '.') . "</td>
-    <td class='{$statusClass}'>{$row['tinhTrang']}</td>
-    <td> 
-        <button type='button' class='open-modal-btn btn-detail' 
-            data-maDon='{$row['maDon']}'
-            data-ngayDat='{$row['ngayDat']}'
-            data-ngayChoi='{$row['ngayChoi']}'
-            data-danhSachSan='{$row['danhSachSan']}'
-            data-danhSachGioChoi='{$row['danhSachGioChoiVaGia']}'
-            data-tongTien='{$row['tongTien']}'
-            data-giaGiam='{$row['giaGiam']}'
-            data-tongThanhToan='{$row['tongThanhToan']}'
-            data-tinhTrang='{$row['tinhTrang']}'
-            onclick='openModal(this)'>Chi tiết
-        </button> 
-    </td>
-</tr>";
+                <?php foreach ($orders as $order):
+                    $statusClass = "";
+                    if ($order['tinhTrang'] == "Chờ xác nhận") {
+                        $statusClass = "status-pending";
+                    } elseif ($order['tinhTrang'] == "Đã xác nhận") {
+                        $statusClass = "status-confirmed";
+                    } elseif ($order['tinhTrang'] == "Hoàn thành") {
+                        $statusClass = "status-completed";
                     }
 
-                }
-
-                ?>
+                    // Tạo HTML cho thông tin sân
+                    $courtInfo = "";
+                    foreach ($order['courts'] as $court) {
+                        $courtInfo .= "<div class='court-info'>";
+                        $courtInfo .= "<strong>{$court['tenSan']}</strong><br>";
+                        $courtInfo .= "{$court['gioChoiVaGia']}<br>";
+                        $courtInfo .= "</div>";
+                    }
+                    ?>
+                    <tr>
+                        <td><b><?= $order['maDon'] ?></b></td>
+                        <td><?= $order['ngayDat'] ?></td>
+                        <td><?= $order['ngayChoi'] ?></td>
+                        <td colspan="2"><?= $courtInfo ?></td>
+                        <td><?= number_format($order['tongTien'], 0, '.', '.') ?></td>
+                        <td><?= number_format($order['giaGiam'], 0, '.', '.') ?></td>
+                        <td><?= number_format($order['tongThanhToan'], 0, '.', '.') ?></td>
+                        <td class="<?= $statusClass ?>"><?= $order['tinhTrang'] ?></td>
+                        <td>
+                            <button type='button' class='open-modal-btn btn-detail'
+                                data-order='<?= htmlspecialchars(json_encode($order), ENT_QUOTES, 'UTF-8') ?>'
+                                onclick='openModal(this)'>Chi tiết
+                            </button>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
             </tbody>
         </table>
 
@@ -297,11 +326,8 @@ $result = $conn->query($str);
                                     <th>Thời gian và giá</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td><span id="modal-danhSachSan"></span></td>
-                                    <td><span id="modal-danhSachGioChoi"></span></td>
-                                </tr>
+                            <tbody id="modal-court-details">
+                                <!-- Sẽ được điền bởi JavaScript -->
                             </tbody>
                         </table>
                     </div>
@@ -317,39 +343,40 @@ $result = $conn->query($str);
 
         <script>
             function openModal(button) {
-                document.getElementById("invoice-modal").style.display = "block";
+                const modal = document.getElementById("invoice-modal");
+                const data = JSON.parse(button.getAttribute("data-order"));
 
-                // Lấy dữ liệu từ button
-                let maDon = button.getAttribute("data-maDon");
-                let ngayDat = button.getAttribute("data-ngayDat");
-                let ngayChoi = button.getAttribute("data-ngayChoi");
-                let danhSachSan = button.getAttribute("data-danhSachSan").replace(/<br>/g, "\n");
-                let danhSachGioChoi = button.getAttribute("data-danhSachGioChoi").replace(/<br>/g, "\n");
-                let tongTien = button.getAttribute("data-tongTien");
-                let giaGiam = button.getAttribute("data-giaGiam");
-                let tongThanhToan = button.getAttribute("data-tongThanhToan");
-                let tinhTrang = button.getAttribute("data-tinhTrang");
+                // Điền thông tin cơ bản
+                document.getElementById("modal-maDon").innerText = data.maDon;
+                document.getElementById("modal-ngayDat").innerText = data.ngayDat;
+                document.getElementById("modal-ngayChoi").innerText = data.ngayChoi;
 
-                // Đổ dữ liệu vào modal
-                document.getElementById("modal-maDon").innerText = maDon;
-                document.getElementById("modal-ngayDat").innerText = ngayDat;
-                document.getElementById("modal-ngayChoi").innerText = ngayChoi;
-                document.getElementById("modal-danhSachSan").innerText = danhSachSan;
-                document.getElementById("modal-danhSachGioChoi").innerText = danhSachGioChoi;
-                document.getElementById("modal-tongTien").innerText = Number(tongTien).toLocaleString("vi-VN") + " đ";
-                document.getElementById("modal-giaGiam").innerText = Number(giaGiam).toLocaleString("vi-VN") + " đ";
-                document.getElementById("modal-tongThanhToan").innerText = Number(tongThanhToan).toLocaleString("vi-VN") + " đ";
+                // Điền thông tin sân
+                const courtDetailsContainer = document.getElementById("modal-court-details");
+                courtDetailsContainer.innerHTML = '';
 
-                document.getElementById("modal-tinhTrang").innerText = tinhTrang;
+                data.courts.forEach(court => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${court.tenSan}</strong></td>
+                        <td>${court.gioChoiVaGia}</td>
+                    `;
+                    courtDetailsContainer.appendChild(row);
+                });
+
+                // Điền thông tin thanh toán
+                document.getElementById("modal-tongTien").innerText = Number(data.tongTien).toLocaleString("vi-VN") + " đ";
+                document.getElementById("modal-giaGiam").innerText = Number(data.giaGiam).toLocaleString("vi-VN") + " đ";
+                document.getElementById("modal-tongThanhToan").innerText = Number(data.tongThanhToan).toLocaleString("vi-VN") + " đ";
+
+                modal.style.display = "block";
             }
 
             function closeModal() {
                 document.getElementById("invoice-modal").style.display = "none";
             }
-
         </script>
     </div>
 </div>
-
 
 <?php include("../layout/footer.php"); ?>

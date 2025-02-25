@@ -1,7 +1,7 @@
 <?php
 session_start();
 $conn = mysqli_connect("localhost", "nhomcnm", "nhomcnm", "sport");
-
+date_default_timezone_set('Asia/Ho_Chi_Minh');
 if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
@@ -286,7 +286,41 @@ $total_price = $booking['total_price'] ?? 0;
     .color-box.booked {
         background-color: #677080;
     }
+
+    .color-note-item {
+        display: flex;
+        align-items: center;
+        margin: 8px 0;
+        margin-left: 40px;
+    }
+
+    .color-box.past {
+        background-color: #dc3545;
+        /* Màu đỏ cho thời gian đã qua */
+    }
 </style>
+<script>
+    // Thêm đoạn này ngay trước </body>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Set ngày mặc định là ngày hiện tại
+        const dateInput = document.getElementById('date');
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const formattedToday = `${yyyy}-${mm}-${dd}`;
+
+        // Nếu chưa chọn ngày, set ngày mặc định
+        if (!dateInput.value) {
+            dateInput.value = formattedToday;
+            // Trigger form submit để load khung giờ
+            dateInput.form.submit();
+        }
+
+        // Set min date là ngày hiện tại
+        dateInput.min = formattedToday;
+    });
+</script>
 
 <div class="container">
     <div class="row">
@@ -363,6 +397,8 @@ $total_price = $booking['total_price'] ?? 0;
                             if (!$result_slots) {
                                 echo "Lỗi truy vấn: " . mysqli_error($conn);
                             } else {
+                                // Thay thế đoạn code tạo time_slots trong phần truy vấn giasan
+                                // Sửa lại phần tạo time_slots
                                 $time_slots = [];
                                 while ($row = mysqli_fetch_assoc($result_slots)) {
                                     $start = strtotime($row['khungGioStart']);
@@ -370,11 +406,26 @@ $total_price = $booking['total_price'] ?? 0;
                                     $interval = $row['khoangCachGio'] * 60;
                                     $price = $row['giaKhoangCach'];
 
+                                    // Lấy thời gian hiện tại
+                                    $current_date = date('Y-m-d');
+                                    $current_time = strtotime(date('H:i'));
+
                                     for ($time = $start; $time < $end; $time += $interval) {
-                                        $slot_start = date('H:i', $time);
-                                        $slot_end = date('H:i', $time + $interval);
+                                        $slot_start = strtotime(date('H:i', $time));
+                                        $slot_end = strtotime(date('H:i', $time + $interval));
+
+                                        // Bỏ qua các khung giờ đã kết thúc
+                                        if ($date == $current_date && $slot_end <= $current_time) {
+                                            continue;
+                                        }
+
+                                        // Bỏ qua tất cả khung giờ của ngày quá khứ
+                                        if ($date < $current_date) {
+                                            continue;
+                                        }
+
                                         $time_slots[] = [
-                                            'time' => "$slot_start - $slot_end",
+                                            'time' => date('H:i', $time) . " - " . date('H:i', $time + $interval),
                                             'price' => $price
                                         ];
                                     }
@@ -398,9 +449,12 @@ $total_price = $booking['total_price'] ?? 0;
                                 }
 
                                 // Hiển thị các khung giờ
+                                // Trong phần hiển thị khung giờ, thay thế đoạn code kiểm tra thời gian:
+                                // Phần hiển thị khung giờ
                                 foreach ($time_slots as $slot) {
                                     $is_booked = in_array($slot['time'], $booked_times);
                                     $is_selected = false;
+
                                     if (isset($_SESSION['booking']['courts'][$selected_court])) {
                                         foreach ($_SESSION['booking']['courts'][$selected_court] as $booking) {
                                             if ($booking['time'] == $slot['time']) {
@@ -411,16 +465,17 @@ $total_price = $booking['total_price'] ?? 0;
                                     }
 
                                     if ($is_booked) {
-                                        echo "<button class='btn btn-dark' disabled>{$slot['time']}</button> ";
+                                        echo "<button class='btn btn-dark' disabled title='Đã có người đặt'>{$slot['time']}</button> ";
                                     } else {
                                         echo "<form method='POST' style='display:inline;'>
-                            <input type='hidden' name='time_slot' value='{$slot['time']}'>
-                            <input type='hidden' name='price' value='{$slot['price']}'>
-                            <button type='submit' class='btn " . ($is_selected ? "btn-secondary-select" : "btn-outline-primary") . "'>
-                                {$slot['time']} (" . number_format($slot['price']) . " VND)
-                            </button>
-                        </form> ";
+            <input type='hidden' name='time_slot' value='{$slot['time']}'>
+            <input type='hidden' name='price' value='{$slot['price']}'>
+            <button type='submit' class='btn " . ($is_selected ? "btn-secondary-select" : "btn-outline-primary") . "'>
+                {$slot['time']} (" . number_format($slot['price']) . " VND)
+            </button>
+        </form> ";
                                     }
+
                                 }
                             }
                         }
