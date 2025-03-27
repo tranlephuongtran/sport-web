@@ -1,68 +1,84 @@
 <?php
-
+session_start();
 $conn = mysqli_connect("localhost", "nhomcnm", "nhomcnm", "sport");
-
-// Kiểm tra kết nối
 if (!$conn) {
     die("Kết nối CSDL thất bại: " . mysqli_connect_error());
 }
 
-// Truy vấn danh sách khuyến mãi
-$query = "SELECT * FROM chinhsach";
-$result = mysqli_query($conn, $query);
-
-// Xử lý cập nhật khuyến mãi
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
-    $maChinhSach = intval($_POST['maChinhSach']);
-    $ten = mysqli_real_escape_string($conn, $_POST['ten']);
-    $noiDung = mysqli_real_escape_string($conn, $_POST['noiDung']);
-
-    if (empty($ten) || empty($noiDung)) {
-        echo "<script>alert('Tên và nội dung không được để trống!');</script>";
-    } else {
-        $query = "UPDATE chinhsach 
-                  SET ten = '$ten', 
-                      noiDung = '$noiDung'
-                  WHERE maChinhSach = $maChinhSach";
-
-        if (mysqli_query($conn, $query)) {
-            echo "<script>alert('Cập nhật thành công!');</script>";
-            header("Location: index_ad.php?rule");
-            exit();
-        } else {
-            echo "<script>alert('Lỗi cập nhật!');</script>";
-        }
+// Lấy danh sách quyền từ session
+$currentPermissions = [];
+if (isset($_SESSION['quyen'])) {
+    if (is_array($_SESSION['quyen'])) {
+        $currentPermissions = $_SESSION['quyen'];
+    } elseif (is_string($_SESSION['quyen'])) {
+        $currentPermissions = array_map('trim', explode(',', $_SESSION['quyen']));
     }
 }
 
+// Kiểm tra quyền truy cập trang
+if (!in_array('Xem chính sách', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
+    echo "<script>alert('Bạn không có quyền truy cập trang này!'); window.location.href='index_ad.php?dashboard';</script>";
+    exit();
+}
+
+// Truy vấn danh sách chính sách
+$query = "SELECT * FROM chinhsach";
+$result = mysqli_query($conn, $query);
+
+// Xử lý thêm chính sách
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
+    if (!in_array('Thêm chính sách', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
+        echo "<script>alert('Bạn không có quyền thêm chính sách!'); window.location.href='index_ad.php?rule';</script>";
+        exit();
+    }
     $ten = mysqli_real_escape_string($conn, $_POST['ten']);
     $noiDung = mysqli_real_escape_string($conn, $_POST['noiDung']);
-
     if (empty($ten) || empty($noiDung)) {
         echo "<script>alert('Tên và nội dung không được để trống!');</script>";
     } else {
-        $query = "INSERT INTO chinhsach (ten, noiDung) 
-                  VALUES ('$ten', '$noiDung')";
-
+        $query = "INSERT INTO chinhsach (ten, noiDung) VALUES ('$ten', '$noiDung')";
         if (mysqli_query($conn, $query)) {
-            header("Location: index_ad.php?rule");
-            exit();
+            echo "<script>alert('Thêm chính sách thành công!'); window.location.href='index_ad.php?rule';</script>";
         } else {
             echo "<script>alert('Lỗi thêm chính sách!');</script>";
         }
     }
 }
 
-// Xử lý xóa khuyến mãi
+// Xử lý cập nhật chính sách
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
+    if (!in_array('Sửa chính sách', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
+        echo "<script>alert('Bạn không có quyền sửa chính sách!'); window.location.href='index_ad.php?rule';</script>";
+        exit();
+    }
+
+    $maChinhSach = intval($_POST['maChinhSach']);
+    $ten = mysqli_real_escape_string($conn, $_POST['ten']);
+    $noiDung = mysqli_real_escape_string($conn, $_POST['noiDung']);
+
+    if (empty($ten) || empty($noiDung)) {
+        echo "<script>alert('Tên và nội dung không được để trống!');</script>";
+    } else {
+        $query = "UPDATE chinhsach SET ten = '$ten', noiDung = '$noiDung' WHERE maChinhSach = $maChinhSach";
+        if (mysqli_query($conn, $query)) {
+            echo "<script>alert('Cập nhật chính sách thành công!'); window.location.href='index_ad.php?rule';</script>";
+        } else {
+            echo "<script>alert('Lỗi cập nhật chính sách!');</script>";
+        }
+    }
+}
+
+// Xử lý xóa chính sách
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
+    if (!in_array('Xóa chính sách', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
+        echo "<script>alert('Bạn không có quyền xóa chính sách!'); window.location.href='index_ad.php?rule';</script>";
+        exit();
+    }
+
     $maChinhSach = intval($_POST['maChinhSach']);
     $query = "DELETE FROM chinhsach WHERE maChinhSach = $maChinhSach";
-
     if (mysqli_query($conn, $query)) {
-        echo "<script>alert('Xóa chính sách thành công!');</script>";
-        header("Location: index_ad.php?rule");
-        exit();
+        echo "<script>alert('Xóa chính sách thành công!'); window.location.href='index_ad.php?rule';</script>";
     } else {
         echo "<script>alert('Lỗi khi xóa chính sách!');</script>";
     }
@@ -78,11 +94,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
     <title>Quản lý Chính Sách</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         .policy-content {
             max-width: 800px;
             max-height: 120px;
-            /* Tối đa chiều cao cho 5 hàng */
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -94,7 +110,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
         .policy-content p {
             margin: 0;
             padding: 0.5em 0;
-            /* Khoảng cách giữa các đoạn */
         }
 
         .modal-lg {
@@ -107,19 +122,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
 
         .btn-icon {
             font-size: 1rem;
-            /* Tăng kích thước icon */
         }
 
         .modal-footer {
             display: flex;
             justify-content: flex-end;
-            /* Giữ nút lưu bên phải */
         }
     </style>
 </head>
 
 <body>
-
     <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur"
         navbar-scroll="true">
         <div class="container-fluid py-1 px-3">
@@ -146,9 +158,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
 
                     <div class="card-body px-0 pb-2">
                         <div class="table-responsive p-3" align="right">
-                            <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addModal"><i
-                                    class='fa fa-add'></i> Thêm mới
-                            </button>
+                            <?php if (in_array('Thêm chính sách', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)): ?>
+                                <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addModal">
+                                    <i class="fa fa-add"></i> Thêm mới
+                                </button>
+                            <?php endif; ?>
                             <table class="table align-items-center mb-0">
                                 <thead>
                                     <tr class="text-center">
@@ -165,7 +179,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                                     <?php
                                     if (mysqli_num_rows($result) > 0) {
                                         while ($row = mysqli_fetch_assoc($result)) {
-                                            // Nếu nội dung dài hơn 5 hàng, hiển thị "..."
                                             $shortContent = $row['noiDung'];
                                             if (substr_count($shortContent, "\n") > 4) {
                                                 $shortContent = implode('<p>', array_slice(explode("\n", $shortContent), 0, 5)) . '...</p>';
@@ -173,22 +186,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                                             echo "<tr class='text-center'>
                                                     <td class='text-start'><h6>{$row['ten']}</h6></td>
                                                     <td class='text-start text-wrap policy-content'>{$shortContent}</td>
-                                                    <td>
-                                                        <a data-toggle='modal'
-                                                           data-target='#editModal'
-                                                           class='btn btn-warning edit-btn btn-icon' 
-                                                           data-id='{$row['maChinhSach']}' 
-                                                           data-ten='{$row['ten']}' 
-                                                           data-noidung='{$row['noiDung']}'>
-                                                           <i class='fa fa-edit'></i>
-                                                        </a>
-                                                        <form method='POST' style='display:inline;'>
-                                                            <input type='hidden' name='maChinhSach' value='{$row['maChinhSach']}'>
-                                                            <button type='submit' name='delete' class='btn btn-danger btn-icon' onclick='return confirm(\"Bạn có chắc chắn muốn xóa Chính sách này?\");'>
-                                                                <i class='fa fa-trash'></i>
-                                                            </button>
-                                                        </form>
-                                                    </td>
+                                                    <td>";
+                                            if (in_array('Sửa chính sách', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)) {
+                                                echo "<a data-toggle='modal' data-target='#editModal' 
+                                                        class='btn btn-warning edit-btn btn-icon' 
+                                                        data-id='" . $row['maChinhSach'] . "' 
+                                                        data-ten='" . htmlspecialchars($row['ten']) . "' 
+                                                        data-noidung='" . htmlspecialchars($row['noiDung']) . "'>
+                                                        <i class='fa fa-edit'></i>
+                                                      </a>";
+                                            }
+                                            if (in_array('Xóa chính sách', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)) {
+                                                echo "<form method='POST' style='display:inline;'>
+                                                        <input type='hidden' name='maChinhSach' value='" . $row['maChinhSach'] . "'>
+                                                        <button type='submit' name='delete' class='btn btn-danger btn-icon' 
+                                                                onclick='return confirm(\"Bạn có chắc chắn muốn xóa Chính sách này?\");'>
+                                                            <i class='fa fa-trash'></i>
+                                                        </button>
+                                                      </form>";
+                                            }
+                                            echo "</td>
                                                 </tr>";
                                         }
                                     } else {
@@ -203,18 +220,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
             </div>
         </div>
     </div>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <script>
-        $(document).ready(function () {
-            $(".edit-btn").click(function () {
-                $("#maChinhSach").val($(this).data("id"));
-                $("#ten").val($(this).data("ten"));
-                $("#noiDung").val($(this).data("noidung"));
-                $("#editModal").modal("show");
-            });
-        });
-    </script>
 
     <!-- Modal sửa chính sách -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
@@ -246,12 +251,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
     </div>
 
     <!-- Modal thêm chính sách -->
-    <div class="modal fade" id="addModal">
+    <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Thêm Chính Sách</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="addModalLabel">Thêm Chính Sách</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form method="POST">
                     <div class="modal-body">
@@ -268,6 +273,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".edit-btn").click(function () {
+                var data = $(this).data();
+                $("#maChinhSach").val(data.id);
+                $("#ten").val(data.ten);
+                $("#noiDung").val(data.noidung);
+                $("#editModal").modal("show");
+            });
+        });
+    </script>
 </body>
 
 </html>
+<?php mysqli_close($conn); ?>

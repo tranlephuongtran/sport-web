@@ -1,10 +1,25 @@
 <?php
-
+session_start();
 $conn = mysqli_connect("localhost", "nhomcnm", "nhomcnm", "sport");
 
 // Kiểm tra kết nối
 if (!$conn) {
     die("Kết nối CSDL thất bại: " . mysqli_connect_error());
+}
+
+// Lấy danh sách quyền từ session
+$currentPermissions = [];
+if (isset($_SESSION['quyen'])) {
+    if (is_array($_SESSION['quyen'])) {
+        $currentPermissions = $_SESSION['quyen'];
+    } elseif (is_string($_SESSION['quyen'])) {
+        $currentPermissions = array_map('trim', explode(',', $_SESSION['quyen']));
+    }
+}
+// Kiểm tra quyền truy cập trang
+if (!in_array('Xem khuyến mãi', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
+    echo "<script>alert('Bạn không có quyền truy cập trang này!'); window.location.href='index_ad.php?dashboard';</script>";
+    exit();
 }
 
 // Xử lý cập nhật trạng thái AJAX
@@ -24,18 +39,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id']) && isset($_POST[
     exit;
 }
 
-// Truy vấn danh sách khuyến mãi
-$query = "SELECT * FROM khuyenmai";
-$result = mysqli_query($conn, $query);
+// Xử lý thêm khuyến mãi
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
+    if (!in_array('Thêm khuyến mãi', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
+        echo "<script>alert('Bạn không có quyền thêm khuyến mãi!'); window.location.href='index_ad.php?discount';</script>";
+        exit();
+    }
+
+    $tenKM = mysqli_real_escape_string($conn, $_POST['tenKM']);
+    $noiDung = mysqli_real_escape_string($conn, $_POST['noiDungChuongTrinh']);
+    $giaGiam = intval($_POST['giaGiam']);
+    $loaiGiamGia = mysqli_real_escape_string($conn, $_POST['loaiGiamGia']);
+
+    if ($giaGiam < 0) {
+        echo "<script>alert('Giá giảm phải lớn hơn hoặc bằng 0!');</script>";
+    } else {
+        $query = "INSERT INTO khuyenmai (tenKM, noiDungChuongTrinh, giaGiam, loaiGiamGia, trangThai) 
+                  VALUES ('$tenKM', '$noiDung', $giaGiam, '$loaiGiamGia', 1)";
+
+        if (mysqli_query($conn, $query)) {
+            echo "<script>alert('Thêm khuyến mãi thành công!'); window.location.href='index_ad.php?discount';</script>";
+        } else {
+            echo "<script>alert('Lỗi thêm khuyến mãi!');</script>";
+        }
+    }
+}
+
 // Xử lý cập nhật khuyến mãi
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
+    if (!in_array('Sửa khuyến mãi', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
+        echo "<script>alert('Bạn không có quyền sửa khuyến mãi!'); window.location.href='index_ad.php?discount';</script>";
+        exit();
+    }
+
     $maKM = intval($_POST['maKM']);
     $tenKM = mysqli_real_escape_string($conn, $_POST['tenKM']);
     $noiDung = mysqli_real_escape_string($conn, $_POST['noiDungChuongTrinh']);
     $giaGiam = intval($_POST['giaGiam']);
     $loaiGiamGia = mysqli_real_escape_string($conn, $_POST['loaiGiamGia']);
 
-    // Kiểm tra điều kiện giá giảm
     if ($giaGiam < 0) {
         echo "<script>alert('Giá giảm phải lớn hơn hoặc bằng 0!');</script>";
     } else {
@@ -47,51 +89,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
                   WHERE maKM = $maKM";
 
         if (mysqli_query($conn, $query)) {
-            echo "<script>alert('Cập nhật thành công!');</script>";
-            header("Location: index_ad.php?discount");
-            exit(); // Load lại trang
+            echo "<script>alert('Cập nhật khuyến mãi thành công!'); window.location.href='index_ad.php?discount';</script>";
         } else {
             echo "<script>alert('Lỗi cập nhật!');</script>";
         }
     }
 }
-/// Xử lý thêm khuyến mãi
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
-    $tenKM = mysqli_real_escape_string($conn, $_POST['tenKM']);
-    $noiDung = mysqli_real_escape_string($conn, $_POST['noiDungChuongTrinh']);
-    $giaGiam = intval($_POST['giaGiam']);
-    $loaiGiamGia = mysqli_real_escape_string($conn, $_POST['loaiGiamGia']);
 
-    // Kiểm tra điều kiện giá giảm
-    if ($giaGiam < 0) {
-        echo "<script>alert('Giá giảm phải lớn hơn hoặc bằng 0!');</script>";
-    } else {
-        $query = "INSERT INTO khuyenmai (tenKM, noiDungChuongTrinh, giaGiam, loaiGiamGia, trangThai) 
-                  VALUES ('$tenKM', '$noiDung', $giaGiam, '$loaiGiamGia', 1)";
-
-        if (mysqli_query($conn, $query)) {
-            header("Location: index_ad.php?discount");
-            exit();
-        } else {
-            echo "<script>alert('Lỗi thêm khuyến mãi!');</script>";
-        }
-    }
-}
-// Xử lý xóa khuyến mãi
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
-    $maKM = intval($_POST['maKM']);
-    $query = "DELETE FROM khuyenmai WHERE maKM = $maKM";
-
-    if (mysqli_query($conn, $query)) {
-        echo "<script>alert('Xóa khuyến mãi thành công!');</script>";
-        header("Location: index_ad.php?discount");
-        exit();
-    } else {
-        echo "<script>alert('Lỗi khi xóa khuyến mãi!');</script>";
-    }
-}
+// Truy vấn danh sách khuyến mãi
+$query = "SELECT * FROM khuyenmai";
+$result = mysqli_query($conn, $query);
 ?>
-
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -103,7 +111,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        /* CSS cho công tắc bật/tắt */
         .switch {
             position: relative;
             display: inline-block;
@@ -156,7 +163,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
 </head>
 
 <body>
-
     <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur"
         navbar-scroll="true">
         <div class="container-fluid py-1 px-3">
@@ -168,11 +174,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                 </ol>
                 <h6 class="font-weight-bolder mb-0">Khuyến Mãi</h6>
             </nav>
-
         </div>
     </nav>
 
-    <!-- End Navbar -->
     <div class="container-fluid py-4">
         <div class="row">
             <div class="col-12">
@@ -181,16 +185,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                         <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
                             <h6 class="text-white text-capitalize ps-3">QUẢN LÝ KHUYẾN MÃI</h6>
                         </div>
-
                     </div>
-
-
                     <div class="card-body px-0 pb-2">
-
                         <div class="table-responsive p-3" align="right">
-                            <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addModal"><i
-                                    class='fa fa-add'></i>Thêm mới
-                            </button>
+                            <?php if (in_array('Thêm khuyến mãi', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)): ?>
+                                <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addModal">
+                                    <i class="fa fa-add"></i> Thêm mới
+                                </button>
+                            <?php endif; ?>
                             <table class="table align-items-center mb-0">
                                 <thead>
                                     <tr class="text-center">
@@ -201,7 +203,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                                             class="text-uppercase text-secondary font-weight-bolder opacity-75 text-start">
                                             NỘI DUNG</th>
                                         <th class="text-uppercase text-secondary font-weight-bolder opacity-75">LOẠI
-                                            GIẢM GIÁ
+                                            GIẢM GIÁ</th>
                                         <th class="text-uppercase text-secondary font-weight-bolder opacity-75">GIÁ GIẢM
                                         </th>
                                         <th class="text-uppercase text-secondary font-weight-bolder opacity-75">TRẠNG
@@ -215,10 +217,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                                         while ($row = mysqli_fetch_assoc($result)) {
                                             $checked = $row['trangThai'] == 1 ? "checked" : "";
                                             echo "<tr class='text-center'>
-                                                    <td class='text-start'>{$row['tenKM']}</td>
-                                                    <td class='text-start text-wrap' style='max-width: 250px;'>{$row['noiDungChuongTrinh']}</td>
-                                                    <td style='max-width: 250px;'>{$row['loaiGiamGia']}</td>
-                                                   <td class='text-primary fw-bold'>"
+                                                    <td class='text-start'>" . htmlspecialchars($row['tenKM']) . "</td>
+                                                    <td class='text-start text-wrap' style='max-width: 250px;'>" . htmlspecialchars($row['noiDungChuongTrinh']) . "</td>
+                                                    <td style='max-width: 250px;'>" . htmlspecialchars($row['loaiGiamGia']) . "</td>
+                                                    <td class='text-primary fw-bold'>"
                                                 . number_format($row['giaGiam'], 0, ',', '.') .
                                                 ($row['loaiGiamGia'] == 'Tiền' ? ' VND' : '%') .
                                                 "</td>
@@ -228,24 +230,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                                                             <span class='slider'></span>
                                                         </label>
                                                     </td>
-                                                    <td>
-                                                        <a data-toggle='modal'
-                                                    data-target='#editModal'
-                                                    class='btn btn-warning edit-btn btn-icon' 
+                                                    <td>";
+                                            if (in_array('Sửa khuyến mãi', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)) {
+                                                echo "<a data-toggle='modal' data-target='#editModal' class='btn btn-warning edit-btn btn-icon' 
                                                         data-id='{$row['maKM']}' 
-                                                        data-tenkm='{$row['tenKM']}' 
-                                                        data-noidung='{$row['noiDungChuongTrinh']}' 
-                                                        data-loaigiamgia='{$row['loaiGiamGia']}'
+                                                        data-tenkm='" . htmlspecialchars($row['tenKM']) . "' 
+                                                        data-noidung='" . htmlspecialchars($row['noiDungChuongTrinh']) . "' 
+                                                        data-loaigiamgia='" . htmlspecialchars($row['loaiGiamGia']) . "'
                                                         data-giagiam='{$row['giaGiam']}'>
                                                         <i class='fa fa-edit'></i>
-                                                        </a>
-                                                        <form method='POST' style='display:inline;'>
-                                                            <input type='hidden' name='maKM' value='{$row['maKM']}''>
-                                                            <button type='submit' name='delete' class='btn btn-danger btn-icon' onclick='return confirm(\"Bạn có chắc chắn muốn xóa khuyến mãi này?\");'>
-                                                                <i class='fa fa-trash'></i>
-                                                            </button>
-                                                        </form>
-                                                    </td>
+                                                      </a>";
+                                            }
+                                            echo "</td>
                                                 </tr>";
                                         }
                                     } else {
@@ -256,12 +252,78 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                             </table>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Modal sửa khuyến mãi -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Sửa Khuyến Mãi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" id="maKM" name="maKM">
+                        <div class="mb-3">
+                            <label class="form-label">Tên Khuyến Mãi</label>
+                            <input type="text" class="form-control" id="tenKM" name="tenKM" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nội Dung</label>
+                            <textarea class="form-control" id="noiDungChuongTrinh" name="noiDungChuongTrinh"
+                                required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Loại Giảm Giá</label>
+                            <input type="text" class="form-control" id="loaiGiamGia" name="loaiGiamGia" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Giá Giảm</label>
+                            <input type="number" class="form-control" id="giaGiam" name="giaGiam" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" name="update">Lưu</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal thêm khuyến mãi -->
+    <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addModalLabel">Thêm Khuyến Mãi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST">
+                    <div class="modal-body">
+                        <input type="text" name="tenKM" class="form-control mb-2" placeholder="Tên" required>
+                        <textarea name="noiDungChuongTrinh" class="form-control mb-2" placeholder="Nội dung"
+                            required></textarea>
+                        <select name="loaiGiamGia" class="form-control mb-2" required>
+                            <option value="" disabled selected>Chọn loại giảm giá</option>
+                            <option value="Tiền">Tiền (VND)</option>
+                            <option value="Phần trăm">Phần trăm (%)</option>
+                        </select>
+                        <input type="number" name="giaGiam" class="form-control mb-2" placeholder="Giá giảm" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="add" class="btn btn-primary">Thêm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thư viện -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function () {
             $(".toggle-status").on("change", function () {
@@ -286,88 +348,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                     }
                 });
             });
-        });
-        $(document).ready(function () {
+
             $(".edit-btn").click(function () {
-                $("#maKM").val($(this).data("id"));
-                $("#tenKM").val($(this).data("tenkm"));
-                $("#noiDungChuongTrinh").val($(this).data("noidung"));
-                $("#loaiGiamGia").val($(this).data("loaigiamgia"));
-                $("#giaGiam").val($(this).data("giagiam"));
+                var data = $(this).data();
+                console.log("Dữ liệu modal:", data);
+
+                $("#maKM").val(data.id);
+                $("#tenKM").val(data.tenkm);
+                $("#noiDungChuongTrinh").val(data.noidung);
+                $("#loaiGiamGia").val(data.loaigiamgia);
+                $("#giaGiam").val(data.giagiam).prop("readonly", false);
+
                 $("#editModal").modal("show");
             });
         });
     </script>
-    <!-- Modal sửa khuyến mãi -->
-    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">Sửa Khuyến Mãi</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form method="POST" enctype="multipart/form-data">
-                        <input type="hidden" id="maKM" name="maKM">
-
-                        <div class="mb-3">
-                            <label class="form-label">Tên Khuyến Mãi</label>
-                            <input type="text" class="form-control" id="tenKM" name="tenKM" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Nội Dung</label>
-                            <textarea class="form-control" id="noiDungChuongTrinh" name="noiDungChuongTrinh"
-                                required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Loại Giảm Giá</label>
-                            <input type="text" class="form-control" id="loaiGiamGia" name="loaiGiamGia" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Giá Giảm</label>
-                            <input type="number" class="form-control" id="giaGiam" name="giaGiam" required>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary" name="update">Lưu</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Modal thêm khuyến mãi -->
-    <div class="modal fade" id="addModal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Thêm Khuyến Mãi</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form method="POST">
-                    <div class="modal-body">
-                        <input type="text" name="tenKM" class="form-control mb-2" placeholder="Tên" required>
-                        <textarea name="noiDungChuongTrinh" class="form-control mb-2" placeholder="Nội dung"
-                            required></textarea>
-                        <select name="loaiGiamGia" class="form-control mb-2" required>
-                            <option value="" disabled selected>Chọn loại giảm giá</option>
-                            <option value="Tiền">Tiền (VND)</option>
-                            <option value="Phần trăm">Phần trăm (%)</option>
-                        </select>
-                        <input type="number" name="giaGiam" class="form-control mb-2" placeholder="Giá giảm" required>
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" name="add" class="btn btn-primary">Thêm</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Thư viện FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
+<?php mysqli_close($conn); ?>

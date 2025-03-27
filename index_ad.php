@@ -27,6 +27,12 @@ if (isset($_GET['order_ad'])) {
     $page_ad = 'rule';
 } else if (isset($_GET['discount'])) {
     $page_ad = 'discount';
+} else if (isset($_GET['order_detail'])) {
+    $page_ad = 'order_detail';
+} else if (isset($_GET['staff'])) {
+    $page_ad = 'staff';
+} else if (isset($_GET['role'])) {
+    $page_ad = 'role';
 } else {
     $page_ad = 'order_ad';
 }

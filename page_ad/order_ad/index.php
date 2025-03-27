@@ -151,6 +151,8 @@ $result = mysqli_query($conn, $query);
                     <th>Tình Trạng</th>
                     <th>Phương Thức Thanh Toán</th>
                     <th>Hình Ảnh</th>
+                    <th>Xem Chi Tiết</th>
+
                   </tr>
                 </thead>
                 <tbody>
@@ -180,6 +182,13 @@ $result = mysqli_query($conn, $query);
                                     style='cursor:pointer'>
                               </a>
                             </td>
+                            <td>
+                              <a href='index_ad.php?order_detail&maDon={$row['maDon']}' 
+                                class='text-primary'>
+                                Xem Chi Tiết
+                              </a>
+                            </td>
+
 
                           </tr>";
                   }
