@@ -9,6 +9,10 @@ if (isset($_GET['register'])) {
     $page = 'login';
     include("page/" . $page . "/index.php");
     exit();
+} else if (isset($_GET['verify'])) {
+    $page = 'verify';
+    include("page/" . $page . "/index.php");
+    exit();
 }
 include("layout/header.php");
 if (isset($_GET['rule'])) {

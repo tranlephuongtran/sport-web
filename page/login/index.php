@@ -14,8 +14,6 @@ if (!isset($_GET['login'])) {
 } else {
     $login = $_GET['login'];
 }
-?>
-<?php
 session_start();
 $conn = mysqli_connect("localhost", "nhomcnm", "nhomcnm", "sport");
 
@@ -28,24 +26,30 @@ if (isset($_POST['btnLogin'])) {
     $email = mysqli_real_escape_string($conn, $_POST['CustomerEmail']);
     $password = mysqli_real_escape_string($conn, $_POST['CustomerPassword']);
 
-    // Truy vấn lấy thông tin người dùng
-    $query = "SELECT taikhoan.maTK, nguoidung.maNguoiDung, khachhang.maKH, taikhoan.password 
-              FROM taikhoan 
-              JOIN nguoidung ON taikhoan.maTK = nguoidung.maTK 
-              JOIN khachhang ON nguoidung.maNguoiDung = khachhang.maNguoiDung 
-              WHERE taikhoan.email = '$email'";
+    $query = "SELECT taikhoan.maTK, nguoidung.maNguoiDung, khachhang.maKH, taikhoan.password, taikhoan.status 
+          FROM taikhoan 
+          JOIN nguoidung ON taikhoan.maTK = nguoidung.maTK 
+          JOIN khachhang ON nguoidung.maNguoiDung = khachhang.maNguoiDung 
+          WHERE taikhoan.email = '$email'";
+
+
 
     $result = mysqli_query($conn, $query);
     if ($user = mysqli_fetch_assoc($result)) {
-        if ($password === $user['password']) {
-            $_SESSION['login'] = $user['maNguoiDung'];
-            $_SESSION['maKH'] = $user['maKH'];
-            echo '<script>
-                alert("Đăng nhập thành công");
-                window.location.href = "index.php?home";
-            </script>';
+        // Kiểm tra trạng thái tài khoản
+        if ($user['status'] == 0) {
+            echo '<script>alert("Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email để kích hoạt tài khoản.");</script>';
         } else {
-            echo '<script>alert("Sai mật khẩu. Vui lòng nhập lại !");</script>';
+            // Kiểm tra mật khẩu
+            if ($password === $user['password']) {
+                $_SESSION['login'] = $user['maNguoiDung'];
+                echo '<script>
+                    alert("Đăng nhập thành công");
+                    window.location.href = "index.php?home";
+                </script>';
+            } else {
+                echo '<script>alert("Sai mật khẩu. Vui lòng nhập lại!");</script>';
+            }
         }
     } else {
         echo '<script>alert("Email không tồn tại");</script>';

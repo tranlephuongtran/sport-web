@@ -67,7 +67,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
         echo "<script>alert('Giá giảm phải lớn hơn hoặc bằng 0!');</script>";
     } else {
         $query = "INSERT INTO khuyenmai (tenKM, noiDungChuongTrinh, giaGiam, loaiGiamGia, trangThai) 
-                  VALUES ('$tenKM', '$noiDung', $giaGiam, 'Tiền', 1)";
+                  VALUES ('$tenKM', '$noiDung', $giaGiam, '$loaiGiamGia', 1)";
 
         if (mysqli_query($conn, $query)) {
             header("Location: index_ad.php?discount");
@@ -148,6 +148,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
         input:checked+.slider:before {
             transform: translateX(14px);
         }
+
+        .btn-icon i {
+            font-size: 1rem;
+        }
     </style>
 </head>
 
@@ -183,9 +187,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
 
                     <div class="card-body px-0 pb-2">
 
-                        <div class="table-responsive p-3">
+                        <div class="table-responsive p-3" align="right">
                             <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addModal"><i
-                                    class='fa fa-add'></i>Thêm
+                                    class='fa fa-add'></i>Thêm mới
                             </button>
                             <table class="table align-items-center mb-0">
                                 <thead>
@@ -196,7 +200,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                                         <th
                                             class="text-uppercase text-secondary font-weight-bolder opacity-75 text-start">
                                             NỘI DUNG</th>
-
+                                        <th class="text-uppercase text-secondary font-weight-bolder opacity-75">LOẠI
+                                            GIẢM GIÁ
                                         <th class="text-uppercase text-secondary font-weight-bolder opacity-75">GIÁ GIẢM
                                         </th>
                                         <th class="text-uppercase text-secondary font-weight-bolder opacity-75">TRẠNG
@@ -212,8 +217,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                                             echo "<tr class='text-center'>
                                                     <td class='text-start'>{$row['tenKM']}</td>
                                                     <td class='text-start text-wrap' style='max-width: 250px;'>{$row['noiDungChuongTrinh']}</td>
-                                                    
-                                                   <td class='text-primary fw-bold'>" . number_format($row['giaGiam'], 0, ',', '.') . " VND</td>
+                                                    <td style='max-width: 250px;'>{$row['loaiGiamGia']}</td>
+                                                   <td class='text-primary fw-bold'>"
+                                                . number_format($row['giaGiam'], 0, ',', '.') .
+                                                ($row['loaiGiamGia'] == 'Tiền' ? ' VND' : '%') .
+                                                "</td>
                                                     <td>
                                                         <label class='switch'>
                                                             <input type='checkbox' class='toggle-status' data-id='{$row['maKM']}' $checked>
@@ -223,7 +231,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                                                     <td>
                                                         <a data-toggle='modal'
                                                     data-target='#editModal'
-                                                    class='btn btn-sm btn-warning edit-btn' 
+                                                    class='btn btn-warning edit-btn btn-icon' 
                                                         data-id='{$row['maKM']}' 
                                                         data-tenkm='{$row['tenKM']}' 
                                                         data-noidung='{$row['noiDungChuongTrinh']}' 
@@ -233,7 +241,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                                                         </a>
                                                         <form method='POST' style='display:inline;'>
                                                             <input type='hidden' name='maKM' value='{$row['maKM']}''>
-                                                            <button type='submit' name='delete' class='btn btn-danger btn-sm' onclick='return confirm(\"Bạn có chắc chắn muốn xóa khuyến mãi này?\");'>
+                                                            <button type='submit' name='delete' class='btn btn-danger btn-icon' onclick='return confirm(\"Bạn có chắc chắn muốn xóa khuyến mãi này?\");'>
                                                                 <i class='fa fa-trash'></i>
                                                             </button>
                                                         </form>
@@ -283,7 +291,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
             $(".edit-btn").click(function () {
                 $("#maKM").val($(this).data("id"));
                 $("#tenKM").val($(this).data("tenkm"));
-                $("#noiDung").val($(this).data("noidung"));
+                $("#noiDungChuongTrinh").val($(this).data("noidung"));
                 $("#loaiGiamGia").val($(this).data("loaigiamgia"));
                 $("#giaGiam").val($(this).data("giagiam"));
                 $("#editModal").modal("show");
@@ -308,15 +316,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Nội Dung</label>
-                            <textarea class="form-control" id="noiDung" name="noiDung" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Giá Giảm</label>
-                            <input type="number" class="form-control" id="giaGiam" name="giaGiam" required>
+                            <textarea class="form-control" id="noiDungChuongTrinh" name="noiDungChuongTrinh"
+                                required></textarea>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Loại Giảm Giá</label>
                             <input type="text" class="form-control" id="loaiGiamGia" name="loaiGiamGia" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Giá Giảm</label>
+                            <input type="number" class="form-control" id="giaGiam" name="giaGiam" required>
                         </div>
 
                         <button type="submit" class="btn btn-primary" name="update">Lưu</button>
@@ -336,7 +345,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                 <form method="POST">
                     <div class="modal-body">
                         <input type="text" name="tenKM" class="form-control mb-2" placeholder="Tên" required>
-                        <textarea name="noiDung" class="form-control mb-2" placeholder="Nội dung" required></textarea>
+                        <textarea name="noiDungChuongTrinh" class="form-control mb-2" placeholder="Nội dung"
+                            required></textarea>
+                        <select name="loaiGiamGia" class="form-control mb-2" required>
+                            <option value="" disabled selected>Chọn loại giảm giá</option>
+                            <option value="Tiền">Tiền (VND)</option>
+                            <option value="Phần trăm">Phần trăm (%)</option>
+                        </select>
                         <input type="number" name="giaGiam" class="form-control mb-2" placeholder="Giá giảm" required>
 
                     </div>
