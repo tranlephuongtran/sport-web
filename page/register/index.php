@@ -66,7 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
             $mail->Username = 'phamquan100503@gmail.com'; // Thay đổi thành email của bạn
-            $mail->Password = 'egprqwgkmlwgrogb'; // Thay đổi thành password của bạn
+            $mail->Password = 'iuea etde iodm jtfi'; // Thay đổi thành password của bạn
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
@@ -90,8 +90,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['verification_code'] = $verificationCode;
 
             // Redirect đến form xác thực
-            echo "<script>window.location.href = 'index.php?verify';</script>";
+            echo "<script>
+                alert('Đăng ký thành công! Vui lòng nhập mã xác thực để kích hoạt tài khoản.');
+                setTimeout(function() {
+                    window.location.href = 'index.php?verify';
+                }); 
+            </script>";
             exit;
+
         } catch (Exception $e) {
             echo "<script>alert('Không thể gửi email: {$mail->ErrorInfo}');</script>";
         }
