@@ -96,7 +96,7 @@
                         <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="material-icons opacity-10">people</i>
                         </div>
-                        <b class="nav-link-text ms-1">QL Nhân viên</b>
+                        <b class="nav-link-text ms-1">Nhân viên</b>
                     </a>
                 </li>
 
@@ -105,7 +105,15 @@
                         <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="material-icons opacity-10">people</i>
                         </div>
-                        <b class="nav-link-text ms-1">QL Vai trò</b>
+                        <b class="nav-link-text ms-1">Vai trò</b>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="index_ad.php?customer">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">people</i>
+                        </div>
+                        <b class="nav-link-text ms-1">Khách hàng</b>
                     </a>
                 </li>
 

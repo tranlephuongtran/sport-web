@@ -6,7 +6,7 @@ if (!$conn) {
   die("Kết nối CSDL thất bại: " . mysqli_connect_error());
 }
 
-// Thiết lập mã hóa UTF-8 cho kết nối
+// Thiết lập mã hóa UTF-8
 mysqli_set_charset($conn, "utf8");
 
 // Cập nhật trạng thái đơn hàng
@@ -33,13 +33,9 @@ $tinhTrangFilter = isset($_GET['tinhTrang']) ? $_GET['tinhTrang'] : 'Tất cả'
 $searchKeyword = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
 $ngayDatFilter = isset($_GET['ngayDat']) ? mysqli_real_escape_string($conn, $_GET['ngayDat']) : '';
 $ngayChoiFilter = isset($_GET['ngayChoi']) ? mysqli_real_escape_string($conn, $_GET['ngayChoi']) : '';
+$customerFilter = isset($_GET['customer']) ? mysqli_real_escape_string($conn, $_GET['customer']) : '';
 
-// Thiết lập phân trang
-$itemsPerPage = 5;
-$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
-$offset = ($page - 1) * $itemsPerPage;
-
-// Truy vấn danh sách đơn hàng
+// Truy vấn cơ bản
 $query = "
     SELECT DISTINCT 
         d.maDon, 
@@ -55,7 +51,8 @@ $query = "
         k.tenKM,
         k.giaGiam,
         nd.ten AS tenKH,
-        nd.sdt AS sdtKH
+        nd.sdt AS sdtKH,
+        kh.maKH AS maKH
     FROM 
         dondatsan d
     JOIN 
@@ -70,9 +67,13 @@ $query = "
         nguoidung nd ON kh.maNguoiDung = nd.maNguoiDung
 ";
 
+// Tạo mảng điều kiện
 $conditions = [];
+if (!empty($customerFilter)) {
+  $conditions[] = "d.maKH = '$customerFilter'";
+}
 if ($tinhTrangFilter !== 'Tất cả') {
-  $conditions[] = "d.tinhTrang = '" . mysqli_real_escape_string($conn, $tinhTrangFilter) . "'";
+  $conditions[] = "d.tinhTrang = '$tinhTrangFilter'";
 }
 if (!empty($searchKeyword)) {
   $conditions[] = "d.maDon LIKE '%$searchKeyword%'";
@@ -83,11 +84,18 @@ if (!empty($ngayDatFilter)) {
 if (!empty($ngayChoiFilter)) {
   $conditions[] = "d.ngayChoi = '$ngayChoiFilter'";
 }
+
+// Áp dụng điều kiện lọc
 if (!empty($conditions)) {
   $query .= " WHERE " . implode(" AND ", $conditions);
 }
 
 $query .= " GROUP BY d.maDon";
+
+// Thiết lập phân trang
+$itemsPerPage = 5;
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+$offset = ($page - 1) * $itemsPerPage;
 
 // Lấy tổng số bản ghi
 $totalQuery = "SELECT COUNT(*) AS total FROM ($query) AS temp";
@@ -126,7 +134,6 @@ $result = mysqli_query($conn, $query);
         </ol>
         <h6 class="font-weight-bolder mb-0">Hóa Đơn</h6>
       </nav>
-
     </div>
   </nav>
 
@@ -141,6 +148,11 @@ $result = mysqli_query($conn, $query);
           </div>
 
           <div class="card-body px-0">
+            <?php if (!empty($customerFilter)): ?>
+              <div align="center" style="font-size: 25px;">
+                Hiển thị hóa đơn của khách hàng có mã: <strong><?= htmlspecialchars($customerFilter) ?></strong>
+              </div>
+            <?php endif; ?>
             <div class="row p-3 align-items-center">
               <div class="col-md-3">
                 <form method="GET">
@@ -157,6 +169,7 @@ $result = mysqli_query($conn, $query);
                   <input type="hidden" name="ngayDat" value="<?= htmlspecialchars($ngayDatFilter) ?>">
                   <input type="hidden" name="ngayChoi" value="<?= htmlspecialchars($ngayChoiFilter) ?>">
                   <input type="hidden" name="search" value="<?= htmlspecialchars($searchKeyword) ?>">
+                  <input type="hidden" name="customer" value="<?= htmlspecialchars($customerFilter) ?>">
                 </form>
               </div>
               <div class="col-md-3">
@@ -167,6 +180,7 @@ $result = mysqli_query($conn, $query);
                   <input type="hidden" name="tinhTrang" value="<?= htmlspecialchars($tinhTrangFilter) ?>">
                   <input type="hidden" name="ngayChoi" value="<?= htmlspecialchars($ngayChoiFilter) ?>">
                   <input type="hidden" name="search" value="<?= htmlspecialchars($searchKeyword) ?>">
+                  <input type="hidden" name="customer" value="<?= htmlspecialchars($customerFilter) ?>">
                 </form>
               </div>
               <div class="col-md-3">
@@ -177,6 +191,7 @@ $result = mysqli_query($conn, $query);
                   <input type="hidden" name="tinhTrang" value="<?= htmlspecialchars($tinhTrangFilter) ?>">
                   <input type="hidden" name="ngayDat" value="<?= htmlspecialchars($ngayDatFilter) ?>">
                   <input type="hidden" name="search" value="<?= htmlspecialchars($searchKeyword) ?>">
+                  <input type="hidden" name="customer" value="<?= htmlspecialchars($customerFilter) ?>">
                 </form>
               </div>
               <div class="col-md-3">
@@ -187,10 +202,9 @@ $result = mysqli_query($conn, $query);
                   <input type="hidden" name="tinhTrang" value="<?= htmlspecialchars($tinhTrangFilter) ?>">
                   <input type="hidden" name="ngayDat" value="<?= htmlspecialchars($ngayDatFilter) ?>">
                   <input type="hidden" name="ngayChoi" value="<?= htmlspecialchars($ngayChoiFilter) ?>">
-
+                  <input type="hidden" name="customer" value="<?= htmlspecialchars($customerFilter) ?>">
                 </form>
               </div>
-
             </div>
 
             <div class="table-responsive p-3">
@@ -203,58 +217,60 @@ $result = mysqli_query($conn, $query);
                     <th>Tổng Tiền</th>
                     <th>Tình Trạng</th>
                     <th class="text-wrap">PT Thanh Toán</th>
-                    <th class="text-wrap">Tên Sân</th>
-                    <th class="text-wrap">Giờ Chơi</th>
+                    <th class="text-wrap">SĐT</th>
                     <th>Hình Ảnh</th>
                     <th>Xem Chi Tiết</th>
                   </tr>
                 </thead>
                 <tbody>
                   <?php
-                  while ($row = mysqli_fetch_assoc($result)) {
-                    $statusColor = $row['tinhTrang'] == 'Hoàn thành' ? 'text-success' :
-                      ($row['tinhTrang'] == 'Đã thanh toán' ? 'text-warning' : 'text-danger');
+                  if (mysqli_num_rows($result) > 0) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                      $statusColor = $row['tinhTrang'] == 'Hoàn thành' ? 'text-success' :
+                        ($row['tinhTrang'] == 'Đã thanh toán' ? 'text-warning' : 'text-danger');
 
-                    $updateLink = ($row['tinhTrang'] == 'Chờ xác nhận' && !empty($row['hinhAnh'])) ||
-                      ($row['tinhTrang'] == 'Đã thanh toán') ?
-                      " onclick='updateTinhTrang({$row['maDon']}, \"{$row['tinhTrang']}\")' style='cursor:pointer; color:blue; text-decoration:underline;'" : "";
+                      $updateLink = ($row['tinhTrang'] == 'Chờ xác nhận' && !empty($row['hinhAnh'])) ||
+                        ($row['tinhTrang'] == 'Đã thanh toán') ?
+                        " onclick='updateTinhTrang({$row['maDon']}, \"{$row['tinhTrang']}\")' style='cursor:pointer; color:blue; text-decoration:underline;'" : "";
 
-                    echo "<tr class='text-center'>
-                                                <td {$updateLink}>{$row['maDon']}</td>
-                                                <td>{$row['ngayDat']}</td>
-                                                <td>{$row['ngayChoi']}</td>
-                                                <td class='text-primary fw-bold'>" . number_format($row['tongTien'], 0, ',', '.') . " VND</td>
-                                                <td class='{$statusColor} fw-bold'>{$row['tinhTrang']}</td>
-                                                <td class='text-wrap'>{$row['phuongThucThanhToan']}</td>
-                                                <td class='text-wrap'>{$row['tenSan']}</td>
-                                                <td class='text-wrap'>{$row['gioChoi']}</td>
-                                                <td>
-                                                    <a href='layout/img/bills/{$row['hinhAnh']}' data-lightbox='bill-image' data-title='Hóa đơn {$row['maDon']}'>
-                                                        <img src='layout/img/bills/{$row['hinhAnh']}' alt='Hóa đơn' width='100' height='100' class='img-thumbnail' style='cursor:pointer'>
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    <button class='btn btn-primary btn-sm detail-btn'
-                                                            data-bs-toggle='modal' 
-                                                            data-bs-target='#orderDetailModal'
-                                                            data-madon='{$row['maDon']}'
-                                                            data-ngaydat='{$row['ngayDat']}'
-                                                            data-ngaychoi='{$row['ngayChoi']}'
-                                                            data-tongtien=" . number_format($row['tongTien'], 0, ',', '.') . "
-                                                            data-tongthanhtoan=" . number_format($row['tongThanhToan'], 0, ',', '.') . "
-                                                            data-tinhtrang='{$row['tinhTrang']}'
-                                                            data-phuongthuc='{$row['phuongThucThanhToan']}'
-                                                            data-tenkh='{$row['tenKH']}'
-                                                            data-sdtkh='{$row['sdtKH']}'
-                                                            data-tensan='{$row['tenSan']}'
-                                                            data-giochoi='{$row['gioChoi']}'
-                                                            data-tenkm='" . ($row['tenKM'] ?? '') . "'
-                                                            data-giagiam='" . ($row['giaGiam'] ? number_format($row['giaGiam'], 0, ',', '.') . ' VND' : '') . "'
-                                                            data-hinhanh='{$row['hinhAnh']}'>
-                                                        Chi Tiết
-                                                    </button>
-                                                </td>
-                                              </tr>";
+                      echo "<tr class='text-center'>
+                              <td {$updateLink}>{$row['maDon']}</td>
+                              <td>{$row['ngayDat']}</td>
+                              <td>{$row['ngayChoi']}</td>
+                              <td class='text-primary fw-bold'>" . number_format($row['tongTien'], 0, ',', '.') . " VND</td>
+                              <td class='{$statusColor} fw-bold'>{$row['tinhTrang']}</td>
+                              <td class='text-wrap'>{$row['phuongThucThanhToan']}</td>
+                              <td class='text-wrap'>{$row['sdtKH']}</td>
+                              <td>
+                                  <a href='layout/img/bills/{$row['hinhAnh']}' data-lightbox='bill-image' data-title='Hóa đơn {$row['maDon']}'>
+                                      <img src='layout/img/bills/{$row['hinhAnh']}' alt='Hóa đơn' width='100' height='100' class='img-thumbnail' style='cursor:pointer'>
+                                  </a>
+                              </td>
+                              <td>
+                                  <button class='btn btn-primary btn-sm detail-btn'
+                                          data-bs-toggle='modal' 
+                                          data-bs-target='#orderDetailModal'
+                                          data-madon='{$row['maDon']}'
+                                          data-ngaydat='{$row['ngayDat']}'
+                                          data-ngaychoi='{$row['ngayChoi']}'
+                                          data-tongtien=" . number_format($row['tongTien'], 0, ',', '.') . "
+                                          data-tongthanhtoan=" . number_format($row['tongThanhToan'], 0, ',', '.') . "
+                                          data-tinhtrang='{$row['tinhTrang']}'
+                                          data-phuongthuc='{$row['phuongThucThanhToan']}'
+                                          data-tenkh='{$row['tenKH']}'
+                                          data-sdtkh='{$row['sdtKH']}'
+                                          data-tensan='{$row['tenSan']}'
+                                          data-giochoi='{$row['gioChoi']}'
+                                          data-tenkm='" . ($row['tenKM'] ?? '') . "'
+                                          data-giagiam='" . ($row['giaGiam'] ? number_format($row['giaGiam'], 0, ',', '.') . ' VND' : '') . "'
+                                          data-hinhanh='{$row['hinhAnh']}'>
+                                      Chi Tiết
+                                  </button>
+                              </td>
+                            </tr>";
+                    }
+                  } else {
+                    echo "<tr><td colspan='10' class='text-center py-4 text-muted'>Không tìm thấy đơn hàng nào.</td></tr>";
                   }
                   ?>
                 </tbody>
@@ -265,14 +281,14 @@ $result = mysqli_query($conn, $query);
                 <ul class="pagination">
                   <?php
                   if ($page > 1) {
-                    echo '<li class="page-item"><a class="page-link" href="?page=' . ($page - 1) . '&tinhTrang=' . $tinhTrangFilter . '&ngayDat=' . $ngayDatFilter . '&ngayChoi=' . $ngayChoiFilter . '&search=' . $searchKeyword . '">Trước</a></li>';
+                    echo '<li class="page-item"><a class="page-link" href="?page=' . ($page - 1) . '&tinhTrang=' . urlencode($tinhTrangFilter) . '&ngayDat=' . urlencode($ngayDatFilter) . '&ngayChoi=' . urlencode($ngayChoiFilter) . '&search=' . urlencode($searchKeyword) . '&customer=' . urlencode($customerFilter) . '">Trước</a></li>';
                   }
                   for ($i = 1; $i <= $totalPages; $i++) {
                     $activeClass = ($i == $page) ? 'active' : '';
-                    echo '<li class="page-item ' . $activeClass . '"><a class="page-link" href="?page=' . $i . '&tinhTrang=' . $tinhTrangFilter . '&ngayDat=' . $ngayDatFilter . '&ngayChoi=' . $ngayChoiFilter . '&search=' . $searchKeyword . '">' . $i . '</a></li>';
+                    echo '<li class="page-item ' . $activeClass . '"><a class="page-link" href="?page=' . $i . '&tinhTrang=' . urlencode($tinhTrangFilter) . '&ngayDat=' . urlencode($ngayDatFilter) . '&ngayChoi=' . urlencode($ngayChoiFilter) . '&search=' . urlencode($searchKeyword) . '&customer=' . urlencode($customerFilter) . '">' . $i . '</a></li>';
                   }
                   if ($page < $totalPages) {
-                    echo '<li class="page-item"><a class="page-link" href="?page=' . ($page + 1) . '&tinhTrang=' . $tinhTrangFilter . '&ngayDat=' . $ngayDatFilter . '&ngayChoi=' . $ngayChoiFilter . '&search=' . $searchKeyword . '">Sau</a></li>';
+                    echo '<li class="page-item"><a class="page-link" href="?page=' . ($page + 1) . '&tinhTrang=' . urlencode($tinhTrangFilter) . '&ngayDat=' . urlencode($ngayDatFilter) . '&ngayChoi=' . urlencode($ngayChoiFilter) . '&search=' . urlencode($searchKeyword) . '&customer=' . urlencode($customerFilter) . '">Sau</a></li>';
                   }
                   ?>
                 </ul>
@@ -325,7 +341,7 @@ $result = mysqli_query($conn, $query);
   <script>
     function updateTinhTrang(maDon, currentStatus) {
       if (confirm("Bạn có chắc chắn muốn cập nhật tình trạng đơn hàng này?")) {
-        window.location.href = "?update_maDon=" + maDon + "¤t_status=" + currentStatus;
+        window.location.href = "?update_maDon=" + maDon + "&current_status=" + currentStatus;
       }
     }
 

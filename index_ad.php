@@ -1,22 +1,5 @@
 <?php
-session_start();
-error_reporting(E_ERROR | E_PARSE);
-ob_start();
-$isLoggedIn = isset($_SESSION['login_ad']);
-if (!$isLoggedIn) {
-    if (!isset($_GET['login'])) {
-        header("Location: index_ad.php?login");
-        exit();
-    }
-}
-
-if (isset($_GET['login'])) {
-    $page_ad = 'login';
-    include("page_ad/" . $page_ad . "/index.php");
-    exit();
-}
-include("class/classdatabase.php");
-include("layout/sidebar.php");
+include("layout/sidebar.php"); // Thêm sidebar vào đây
 if (isset($_GET['order_ad'])) {
     $page_ad = 'order_ad';
 } else if (isset($_GET['dashboard'])) {
@@ -33,8 +16,9 @@ if (isset($_GET['order_ad'])) {
     $page_ad = 'staff';
 } else if (isset($_GET['role'])) {
     $page_ad = 'role';
+} else if (isset($_GET['customer'])) {
+    $page_ad = 'customer';
 } else {
     $page_ad = 'order_ad';
 }
 include("page_ad/" . $page_ad . "/index.php");
-?>
