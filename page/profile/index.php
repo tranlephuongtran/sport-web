@@ -191,15 +191,15 @@ if (mysqli_num_rows($result) > 0) {
                     <form method="POST" action="">
                         <div class="mb-4">
                             <label class="form-label">Email</label>
-                            <input type="email" class="form-control" value="<?= $email ?>" name="email">
+                            <input type="email" class="form-control" value="<?= $email ?>" name="email" required>
                         </div>
                         <div class="mb-4">
                             <label class="form-label">Tên của bạn</label>
-                            <input type="text" class="form-control" value="<?= $ten ?>" name="name">
+                            <input type="text" class="form-control" value="<?= $ten ?>" name="name" required>
                         </div>
                         <div class="mb-4">
                             <label class="form-label">Số điện thoại</label>
-                            <input type="text" class="form-control" value="<?= $sdt ?>" name="phone">
+                            <input type="text" class="form-control" value="<?= $sdt ?>" name="phone" required>
                         </div>
                         <button type="submit" class="btn btn-primary btn-custom" name="btn-save-profile">💾 Lưu thay
                             đổi</button>
