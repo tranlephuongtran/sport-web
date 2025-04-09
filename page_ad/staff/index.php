@@ -6,48 +6,34 @@ if (!$conn) {
     die("Kết nối CSDL thất bại: " . mysqli_connect_error());
 }
 
-// Lấy danh sách quyền từ session
-$currentPermissions = [];
-if (isset($_SESSION['quyen'])) {
-    if (is_array($_SESSION['quyen'])) {
-        $currentPermissions = $_SESSION['quyen'];
-    } elseif (is_string($_SESSION['quyen'])) {
-        $currentPermissions = array_map('trim', explode(',', $_SESSION['quyen']));
-    }
-}
-
-// Kiểm tra quyền truy cập trang
-if (!in_array('Xem nhân viên', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
-    echo "<script>alert('Bạn không có quyền truy cập trang này!'); window.location.href='index_ad.php?dashboard';</script>";
-    exit();
-}
-
 // Truy vấn danh sách nhân viên
 $query = "
     SELECT 
-        nv.maNV, 
-        nd.ten, 
-        nd.sdt, 
-        tk.email, 
-        tk.password, 
-        nv.ngayVaoLam, 
-        r.roleName,
-        r.maRole,
-        r.quyen
-    FROM 
-        nhanvien nv
-    JOIN 
-        nguoidung nd ON nv.maNguoiDung = nd.maNguoiDung
-    JOIN 
-        taikhoan tk ON nd.maTK = tk.maTK
-    JOIN 
-        role r ON tk.maRole = r.maRole
+    nv.maNV, 
+    nd.ten, 
+    nd.sdt, 
+    tk.email, 
+    tk.password, 
+    nv.ngayVaoLam,
+    GROUP_CONCAT(r.roleName SEPARATOR ', ') AS roleNames
+FROM 
+    nhanvien nv
+JOIN 
+    nguoidung nd ON nv.maNguoiDung = nd.maNguoiDung
+JOIN 
+    taikhoan tk ON nd.maTK = tk.maTK
+LEFT JOIN 
+    user_role ur ON nd.maNguoiDung = ur.maNguoiDung
+LEFT JOIN 
+    role r ON ur.maRole = r.maRole
+GROUP BY 
+    nv.maNV, nd.ten, nd.sdt, tk.email, tk.password, nv.ngayVaoLam
 ";
 $result = mysqli_query($conn, $query);
 
-// Truy vấn danh sách vai trò để hiển thị trong dropdown
-$roleQuery = "SELECT maRole, roleName FROM role";
-$roleResult = mysqli_query($conn, $roleQuery);
+// Truy vấn danh sách vai trò (loại trừ vai trò 'Khách hàng')
+$roleQuery = "SELECT maRole, roleName FROM role WHERE roleName != 'Khách hàng'";
+$roleResult = mysqli_query($conn, $roleQuery); // Sửa từ $query thành $roleQuery
 
 // Lưu dữ liệu vai trò vào mảng để sử dụng nhiều lần
 $roles = [];
@@ -57,11 +43,6 @@ while ($role = mysqli_fetch_assoc($roleResult)) {
 
 // Xử lý thêm nhân viên mới
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
-    if (!in_array('Thêm nhân viên', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
-        echo "<script>alert('Bạn không có quyền thêm nhân viên!'); window.location.href='index_ad.php?staff';</script>";
-        exit();
-    }
-
     $ten = mysqli_real_escape_string($conn, $_POST['ten']);
     $sdt = mysqli_real_escape_string($conn, $_POST['sdt']);
     $email = mysqli_real_escape_string($conn, $_POST['email']);
@@ -80,6 +61,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
                 $maNguoiDung = mysqli_insert_id($conn);
                 $query_nv = "INSERT INTO nhanvien (ngayVaoLam, maNguoiDung) VALUES ('$ngayVaoLam', $maNguoiDung)";
                 if (mysqli_query($conn, $query_nv)) {
+                    // Thêm vai trò vào bảng user_role
+                    $query_ur = "INSERT INTO user_role (maNguoiDung, maRole) VALUES ($maNguoiDung, $maRole)";
+                    mysqli_query($conn, $query_ur);
                     echo "<script>alert('Thêm nhân viên thành công!'); window.location.href='index_ad.php?staff';</script>";
                 } else {
                     echo "<script>alert('Lỗi khi thêm vào bảng nhanvien!');</script>";
@@ -95,11 +79,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
 
 // Xử lý cập nhật nhân viên
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
-    if (!in_array('Sửa nhân viên', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
-        echo "<script>alert('Bạn không có quyền sửa nhân viên!'); window.location.href='index_ad.php?staff';</script>";
-        exit();
-    }
-
     $maNV = intval($_POST['maNV']);
     $ten = mysqli_real_escape_string($conn, $_POST['ten']);
     $sdt = mysqli_real_escape_string($conn, $_POST['sdt']);
@@ -111,6 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
     if (empty($ten) || empty($sdt) || empty($email) || empty($password) || empty($maRole) || empty($ngayVaoLam)) {
         echo "<script>alert('Vui lòng điền đầy đủ thông tin!');</script>";
     } else {
+        // Cập nhật thông tin nhân viên
         $query = "UPDATE nhanvien nv
                   JOIN nguoidung nd ON nv.maNguoiDung = nd.maNguoiDung
                   JOIN taikhoan tk ON nd.maTK = tk.maTK
@@ -123,22 +103,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
                   WHERE nv.maNV = $maNV";
 
         if (mysqli_query($conn, $query)) {
-            // Cập nhật session nếu tài khoản được sửa là tài khoản đang đăng nhập
-            if (isset($_SESSION['maNV']) && $_SESSION['maNV'] == $maNV) {
-                $roleQuery = "SELECT r.maRole, r.quyen 
-                              FROM taikhoan tk 
-                              JOIN role r ON tk.maRole = r.maRole 
-                              WHERE tk.email = '$email'";
-                $roleResult = mysqli_query($conn, $roleQuery);
-                $roleData = mysqli_fetch_assoc($roleResult);
+            // Cập nhật vai trò trong user_role
+            $maNguoiDungQuery = "SELECT maNguoiDung FROM nhanvien WHERE maNV = $maNV";
+            $maNguoiDungResult = mysqli_query($conn, $maNguoiDungQuery);
+            $maNguoiDung = mysqli_fetch_assoc($maNguoiDungResult)['maNguoiDung'];
 
-                $_SESSION['maRole'] = $roleData['maRole'];
-                $_SESSION['quyen'] = $roleData['quyen'] ? array_map('trim', explode(',', $roleData['quyen'])) : [];
-
-                if (!in_array('Xem nhân viên', $_SESSION['quyen']) && $_SESSION['maRole'] != 1) {
-                    echo "<script>alert('Cập nhật nhân viên thành công! Vai trò của bạn đã thay đổi, bạn không còn quyền truy cập trang này.'); window.location.href='index_ad.php?dashboard';</script>";
-                    exit();
-                }
+            // Xóa vai trò cũ và thêm vai trò mới (nếu muốn giữ nhiều vai trò, bỏ đoạn xóa)
+            $deleteQuery = "DELETE FROM user_role WHERE maNguoiDung = $maNguoiDung AND maRole != $maRole";
+            mysqli_query($conn, $deleteQuery);
+            $checkQuery = "SELECT * FROM user_role WHERE maNguoiDung = $maNguoiDung AND maRole = $maRole";
+            if (mysqli_num_rows(mysqli_query($conn, $checkQuery)) == 0) {
+                $insertQuery = "INSERT INTO user_role (maNguoiDung, maRole) VALUES ($maNguoiDung, $maRole)";
+                mysqli_query($conn, $insertQuery);
             }
             echo "<script>alert('Cập nhật nhân viên thành công!'); window.location.href='index_ad.php?staff';</script>";
         } else {
@@ -149,18 +125,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
 
 // Xử lý xóa nhân viên
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
-    if (!in_array('Xóa nhân viên', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
-        echo "<script>alert('Bạn không có quyền xóa nhân viên!'); window.location.href='index_ad.php?staff';</script>";
-        exit();
-    }
-
     $maNV = intval($_POST['maNV']);
-    $query = "DELETE FROM nhanvien WHERE maNV = $maNV";
+    $maNguoiDungQuery = "SELECT maNguoiDung FROM nhanvien WHERE maNV = $maNV";
+    $maNguoiDungResult = mysqli_query($conn, $maNguoiDungQuery);
+    $maNguoiDung = mysqli_fetch_assoc($maNguoiDungResult)['maNguoiDung'];
 
+    // Xóa vai trò từ user_role
+    $deleteRoleQuery = "DELETE FROM user_role WHERE maNguoiDung = $maNguoiDung";
+    mysqli_query($conn, $deleteRoleQuery);
+
+    // Xóa nhân viên
+    $query = "DELETE FROM nhanvien WHERE maNV = $maNV";
     if (mysqli_query($conn, $query)) {
         echo "<script>alert('Xóa nhân viên thành công!'); window.location.href='index_ad.php?staff';</script>";
     } else {
-        echo "<script>alert('Lỗi khi xóa nhân viên!');</script>";
+        echo "<script>alert('Lỗi khi xóa nhân viên: " . mysqli_error($conn) . "');</script>";
     }
 }
 ?>
@@ -220,11 +199,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
 
                     <div class="card-body px-0">
                         <div class="table-responsive p-3" align="right">
-                            <?php if (in_array('Thêm nhân viên', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)): ?>
-                                <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addModal">
-                                    <i class="fa fa-plus"></i> Thêm mới
-                                </button>
-                            <?php endif; ?>
+                            <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addModal">
+                                <i class="fa fa-plus"></i> Thêm mới
+                            </button>
                             <table class="table align-items-center mb-0">
                                 <thead>
                                     <tr class="text-center">
@@ -244,37 +221,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                                             <td><?= htmlspecialchars($row['ten']) ?></td>
                                             <td><?= htmlspecialchars($row['sdt']) ?></td>
                                             <td><?= htmlspecialchars($row['email']) ?></td>
-                                            <td><?= htmlspecialchars($row['roleName']) ?></td>
+                                            <td><?= htmlspecialchars($row['roleNames'] ?: 'Chưa có vai trò') ?></td>
                                             <td><?= htmlspecialchars($row['ngayVaoLam']) ?></td>
                                             <td>
-                                                <?php if (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1): ?>
-                                                    <a href="index_ad.php?role&maNV=<?= $row['maNV'] ?>"
-                                                        class="btn btn-sm btn-outline-primary btn-icon">
-                                                        <i class="fa fa-shield-alt"></i>
-                                                    </a>
-                                                <?php endif; ?>
-                                                <?php if (in_array('Sửa nhân viên', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)): ?>
-                                                    <button class="btn btn-sm btn-warning edit-btn btn-icon"
-                                                        data-id="<?= $row['maNV'] ?>"
-                                                        data-ten="<?= htmlspecialchars($row['ten']) ?>"
-                                                        data-sdt="<?= htmlspecialchars($row['sdt']) ?>"
-                                                        data-email="<?= htmlspecialchars($row['email']) ?>"
-                                                        data-password="<?= htmlspecialchars($row['password']) ?>"
-                                                        data-marole="<?= $row['maRole'] ?>"
-                                                        data-ngayvaolam="<?= htmlspecialchars($row['ngayVaoLam']) ?>">
-                                                        <i class="fa fa-edit"></i>
+
+                                                <button class="btn btn-warning edit-btn btn-icon"
+                                                    data-id="<?= $row['maNV'] ?>"
+                                                    data-ten="<?= htmlspecialchars($row['ten']) ?>"
+                                                    data-sdt="<?= htmlspecialchars($row['sdt']) ?>"
+                                                    data-email="<?= htmlspecialchars($row['email']) ?>"
+                                                    data-password="<?= htmlspecialchars($row['password']) ?>"
+                                                    data-marole="<?= $row['maRole'] ?>"
+                                                    data-ngayvaolam="<?= htmlspecialchars($row['ngayVaoLam']) ?>">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+                                                <form method="POST" style="display:inline;">
+                                                    <input type="hidden" name="maNV" value="<?= $row['maNV'] ?>">
+                                                    <button type="submit" name="delete" class="btn btn-danger btn-icon"
+                                                        onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?');">
+                                                        <i class="fa fa-trash"></i>
                                                     </button>
-                                                <?php endif; ?>
-                                                <?php if (in_array('Xóa nhân viên', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)): ?>
-                                                    <form method="POST" style="display:inline;">
-                                                        <input type="hidden" name="maNV" value="<?= $row['maNV'] ?>">
-                                                        <button type="submit" name="delete"
-                                                            class="btn btn-sm btn-danger btn-icon"
-                                                            onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?');">
-                                                            <i class="fa fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                <?php endif; ?>
+                                                </form>
                                             </td>
                                         </tr>
                                     <?php endwhile; ?>

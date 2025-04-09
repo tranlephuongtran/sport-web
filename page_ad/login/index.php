@@ -44,7 +44,7 @@ if (isset($_POST['btnLogin_ad'])) {
         // Kiểm tra mật khẩu
         if ($password === $user['password']) { // Nên thay bằng password_verify nếu mã hóa
             // Kiểm tra vai trò (chỉ cho phép Admin hoặc Nhân viên)
-            if ($user['maRole'] == 1 || $user['maRole'] == 2) { // 1 = Admin, 2 = Nhân viên
+            if ($user['maRole'] != 3) {
                 $_SESSION['login_ad'] = $user['maNguoiDung'];
                 $_SESSION['maRole'] = $user['maRole'];
                 $_SESSION['maNV'] = $user['maNV'];

@@ -7,21 +7,6 @@ if (!$conn) {
     die("Kết nối CSDL thất bại: " . mysqli_connect_error());
 }
 
-// Lấy danh sách quyền từ session
-$currentPermissions = [];
-if (isset($_SESSION['quyen'])) {
-    if (is_array($_SESSION['quyen'])) {
-        $currentPermissions = $_SESSION['quyen'];
-    } elseif (is_string($_SESSION['quyen'])) {
-        $currentPermissions = array_map('trim', explode(',', $_SESSION['quyen']));
-    }
-}
-// Kiểm tra quyền truy cập trang
-if (!in_array('Xem khuyến mãi', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
-    echo "<script>alert('Bạn không có quyền truy cập trang này!'); window.location.href='index_ad.php?dashboard';</script>";
-    exit();
-}
-
 // Xử lý cập nhật trạng thái AJAX
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id']) && isset($_POST['status'])) {
     $id = intval($_POST['id']);
@@ -41,11 +26,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id']) && isset($_POST[
 
 // Xử lý thêm khuyến mãi
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
-    if (!in_array('Thêm khuyến mãi', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
-        echo "<script>alert('Bạn không có quyền thêm khuyến mãi!'); window.location.href='index_ad.php?discount';</script>";
-        exit();
-    }
-
     $tenKM = mysqli_real_escape_string($conn, $_POST['tenKM']);
     $noiDung = mysqli_real_escape_string($conn, $_POST['noiDungChuongTrinh']);
     $giaGiam = intval($_POST['giaGiam']);
@@ -67,11 +47,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
 
 // Xử lý cập nhật khuyến mãi
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
-    if (!in_array('Sửa khuyến mãi', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
-        echo "<script>alert('Bạn không có quyền sửa khuyến mãi!'); window.location.href='index_ad.php?discount';</script>";
-        exit();
-    }
-
     $maKM = intval($_POST['maKM']);
     $tenKM = mysqli_real_escape_string($conn, $_POST['tenKM']);
     $noiDung = mysqli_real_escape_string($conn, $_POST['noiDungChuongTrinh']);
@@ -188,11 +163,9 @@ $result = mysqli_query($conn, $query);
                     </div>
                     <div class="card-body px-0 pb-2">
                         <div class="table-responsive p-3" align="right">
-                            <?php if (in_array('Thêm khuyến mãi', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)): ?>
-                                <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addModal">
-                                    <i class="fa fa-add"></i> Thêm mới
-                                </button>
-                            <?php endif; ?>
+                            <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addModal">
+                                <i class="fa fa-add"></i> Thêm mới
+                            </button>
                             <table class="table align-items-center mb-0">
                                 <thead>
                                     <tr class="text-center">
@@ -230,18 +203,16 @@ $result = mysqli_query($conn, $query);
                                                             <span class='slider'></span>
                                                         </label>
                                                     </td>
-                                                    <td>";
-                                            if (in_array('Sửa khuyến mãi', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)) {
-                                                echo "<a data-toggle='modal' data-target='#editModal' class='btn btn-warning edit-btn btn-icon' 
-                                                        data-id='{$row['maKM']}' 
-                                                        data-tenkm='" . htmlspecialchars($row['tenKM']) . "' 
-                                                        data-noidung='" . htmlspecialchars($row['noiDungChuongTrinh']) . "' 
-                                                        data-loaigiamgia='" . htmlspecialchars($row['loaiGiamGia']) . "'
-                                                        data-giagiam='{$row['giaGiam']}'>
-                                                        <i class='fa fa-edit'></i>
-                                                      </a>";
-                                            }
-                                            echo "</td>
+                                                    <td>
+                                                        <a data-toggle='modal' data-target='#editModal' class='btn btn-warning edit-btn btn-icon' 
+                                                            data-id='{$row['maKM']}' 
+                                                            data-tenkm='" . htmlspecialchars($row['tenKM']) . "' 
+                                                            data-noidung='" . htmlspecialchars($row['noiDungChuongTrinh']) . "' 
+                                                            data-loaigiamgia='" . htmlspecialchars($row['loaiGiamGia']) . "'
+                                                            data-giagiam='{$row['giaGiam']}'>
+                                                            <i class='fa fa-edit'></i>
+                                                        </a>
+                                                    </td>
                                                 </tr>";
                                         }
                                     } else {

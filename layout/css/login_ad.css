@@ -13,7 +13,7 @@ body {
 }
 
 #form-login {
-    max-width: 400px;
+    max-width: 300px;
     background: rgba(18, 18, 19, 0.8);
     flex-grow: 1;
     padding: 30px 30px 40px;
