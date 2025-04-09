@@ -23,17 +23,7 @@
     <link id="pagestyle" href="layout/css/material-dashboard.css?v=3.0.0" rel="stylesheet" />
 </head>
 
-<?php
-// Xử lý $_SESSION['quyen'] để tránh lỗi explode
-$currentPermissions = [];
-if (isset($_SESSION['quyen'])) {
-    if (is_array($_SESSION['quyen'])) {
-        $currentPermissions = $_SESSION['quyen'];
-    } elseif (is_string($_SESSION['quyen'])) {
-        $currentPermissions = array_map('trim', explode(',', $_SESSION['quyen']));
-    }
-}
-?>
+
 
 <body class="g-sidenav-show  bg-gray-200">
     <aside
@@ -51,69 +41,74 @@ if (isset($_SESSION['quyen'])) {
         <hr class="horizontal light mt-0 mb-2">
         <div class="collapse navbar-collapse  w-auto  max-height-vh-100" id="sidenav-collapse-main">
             <ul class="navbar-nav">
-                <?php if (in_array('Xem báo cáo', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)): ?>
-                    <li class="nav-item">
-                        <a class="nav-link text-white report-toggle" href="#">
-                            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                <i class="material-icons opacity-10">bar_chart</i>
-                            </div>
-                            <b class="nav-link-text ms-1">Báo cáo</b>
-                        </a>
-                        <div class="collapse" id="reportSubmenu" data-bs-parent="#sidenav-collapse-main">
-                            <ul class="nav flex-column ms-3">
-                                <li class="nav-item">
-                                    <a class="nav-link text-white" href="index_ad.php?dashboard">Báo cáo Doanh thu</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-white" href="index_ad.php?report_orders">Báo cáo Đơn đặt</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-white" href="index_ad.php?report_endday">Báo cáo Cuối ngày</a>
-                                </li>
-                            </ul>
+
+                <li class="nav-item">
+                    <a class="nav-link text-white report-toggle" href="#">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">bar_chart</i>
                         </div>
-                    </li>
-                <?php endif; ?>
-                <?php if (in_array('Xem hóa đơn', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)): ?>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="index_ad.php?order_ad">
-                            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                <i class="material-icons opacity-10">receipt_long</i>
-                            </div>
-                            <b class="nav-link-text ms-1">Hóa đơn</b>
-                        </a>
-                    </li>
-                <?php endif; ?>
-                <?php if (in_array('Xem chính sách', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)): ?>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="index_ad.php?rule">
-                            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                <i class="material-icons opacity-10">policy</i>
-                            </div>
-                            <b class="nav-link-text ms-1">Chính sách</b>
-                        </a>
-                    </li>
-                <?php endif; ?>
-                <?php if (in_array('Xem khuyến mãi', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)): ?>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="index_ad.php?discount">
-                            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                <i class="material-icons opacity-10">local_offer</i>
-                            </div>
-                            <b class="nav-link-text ms-1">Khuyến mãi</b>
-                        </a>
-                    </li>
-                <?php endif; ?>
-                <?php if (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1): ?>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="index_ad.php?staff">
-                            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                <i class="material-icons opacity-10">people</i>
-                            </div>
-                            <b class="nav-link-text ms-1">QL Nhân viên</b>
-                        </a>
-                    </li>
-                <?php endif; ?>
+                        <b class="nav-link-text ms-1">Báo cáo</b>
+                    </a>
+                    <div class="collapse" id="reportSubmenu" data-bs-parent="#sidenav-collapse-main">
+                        <ul class="nav flex-column ms-3">
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="index_ad.php?dashboard">Báo cáo Doanh thu</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="index_ad.php?report_orders">Báo cáo Đơn đặt</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="index_ad.php?report_endday">Báo cáo Cuối ngày</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="index_ad.php?order_ad">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">receipt_long</i>
+                        </div>
+                        <b class="nav-link-text ms-1">Hóa đơn</b>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="index_ad.php?rule">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">policy</i>
+                        </div>
+                        <b class="nav-link-text ms-1">Chính sách</b>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="index_ad.php?discount">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">local_offer</i>
+                        </div>
+                        <b class="nav-link-text ms-1">Khuyến mãi</b>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="index_ad.php?staff">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">people</i>
+                        </div>
+                        <b class="nav-link-text ms-1">QL Nhân viên</b>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="index_ad.php?role">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">people</i>
+                        </div>
+                        <b class="nav-link-text ms-1">QL Vai trò</b>
+                    </a>
+                </li>
+
                 <li class="nav-item">
                     <?php if (isset($_SESSION['login_ad'])): ?>
                         <a class="nav-link text-white" href="index_ad.php?logout">

@@ -1,9 +1,13 @@
 <?php
 $conn = mysqli_connect("localhost", "nhomcnm", "nhomcnm", "sport");
 
+// Kiểm tra kết nối
 if (!$conn) {
   die("Kết nối CSDL thất bại: " . mysqli_connect_error());
 }
+
+// Thiết lập mã hóa UTF-8 cho kết nối CSDL
+mysqli_set_charset($conn, "utf8");
 
 $fromDate = isset($_GET['fromDate']) ? $_GET['fromDate'] : date('Y-m-01');
 $toDate = isset($_GET['toDate']) ? $_GET['toDate'] : date('Y-m-t');
@@ -36,7 +40,6 @@ while ($row = mysqli_fetch_assoc($result)) {
   $totalRevenue += $row['doanhThu'];
   $totalPaid += $row['tongThanhToan'];
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -44,10 +47,13 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Doanh Thu</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+  <!-- Thêm Google Fonts hỗ trợ tiếng Việt -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -70,7 +76,7 @@ while ($row = mysqli_fetch_assoc($result)) {
       <div class="row">
         <div class="col-md-8">
           <div class="card p-3 mb-4">
-            <h5 class="text-center">DOANH THU THEO NGÀY</h5>
+            <h5 class="text-center">DOANH THU THEO NGÀY</h5>
             <div id="mixed-chart" style="height: 300px;"></div>
           </div>
         </div>
@@ -78,16 +84,12 @@ while ($row = mysqli_fetch_assoc($result)) {
         <!-- Biểu đồ Donut tổng doanh thu -->
         <div class="col-md-4">
           <div class="card p-3 text-center">
-            <h5 class="fw-bold">TỔNG DOANH THU</h5>
+            <h5 class="fw-bold">TỔNG DOANH THU</h5>
             <div id="donut-chart" style="height: 300px;"></div>
           </div>
         </div>
       </div>
-
     </div>
-
-
-
 
     <div class="table-responsive card">
       <table class="table text-center">
@@ -95,18 +97,17 @@ while ($row = mysqli_fetch_assoc($result)) {
           <tr>
             <th>Ngày</th>
             <th>Doanh Thu (VND)</th>
-            <th>Doanh Thu (VND) (Đã trừ Vouchers)</th>
+            <th>Doanh Thu Đã trừ Vouchers (VND) </th>
           </tr>
         </thead>
         <tbody>
           <?php foreach ($dataChart as $data): ?>
             <tr>
-              <td><?= $data['date'] ?></td>
+              <td><?= htmlspecialchars($data['date']) ?></td>
               <td class="text-primary fw-bold"><?= number_format($data['revenue'], 0, ',', '.') ?></td>
               <td class="text-success fw-bold"><?= number_format($data['paid'], 0, ',', '.') ?></td>
             </tr>
           <?php endforeach; ?>
-
           <tr class="table-success fw-bold">
             <td>Tổng Cộng</td>
             <td class="text-primary"><?= number_format($totalRevenue, 0, ',', '.') ?> VND</td>
@@ -134,31 +135,48 @@ while ($row = mysqli_fetch_assoc($result)) {
       behaveLikeLine: true,
       hideHover: 'auto',
       resize: true,
-      parseTime: false
+      parseTime: false,
+      pointSize: 4,
+      gridTextFamily: 'Roboto', // Sử dụng font Roboto cho biểu đồ
+      gridTextSize: 12
     });
 
     new Morris.Donut({
       element: 'donut-chart',
       data: [
-        { label: "Tổng Doanh Thu", value: <?= $totalRevenue ?> },
-        { label: "Sau khi trừ Voucher", value: <?= $totalPaid ?> }
+        { label: "Doanh Thu", value: <?= $totalRevenue ?> },
+        { label: "Sau Voucher", value: <?= $totalPaid ?> }
       ],
       colors: ['#007bff', '#28a745'],
-      resize: true
+      resize: true,
+
+      labelSize: 14
     });
   </script>
 
   <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+
     .card {
       padding: 10px;
       border-radius: 15px;
       box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     }
 
-    #bar-chart {
+    #mixed-chart,
+    #donut-chart {
       max-height: 300px;
+    }
+
+    /* Đảm bảo font áp dụng cho biểu đồ */
+    .morris-hover,
+    .morris-default-style {
+      /* font-family: 'Roboto', sans-serif !important; */
     }
   </style>
 </body>
 
 </html>
+<?php mysqli_close($conn); ?>

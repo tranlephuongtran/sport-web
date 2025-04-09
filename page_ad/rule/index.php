@@ -5,32 +5,12 @@ if (!$conn) {
     die("Kết nối CSDL thất bại: " . mysqli_connect_error());
 }
 
-// Lấy danh sách quyền từ session
-$currentPermissions = [];
-if (isset($_SESSION['quyen'])) {
-    if (is_array($_SESSION['quyen'])) {
-        $currentPermissions = $_SESSION['quyen'];
-    } elseif (is_string($_SESSION['quyen'])) {
-        $currentPermissions = array_map('trim', explode(',', $_SESSION['quyen']));
-    }
-}
-
-// Kiểm tra quyền truy cập trang
-if (!in_array('Xem chính sách', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
-    echo "<script>alert('Bạn không có quyền truy cập trang này!'); window.location.href='index_ad.php?dashboard';</script>";
-    exit();
-}
-
 // Truy vấn danh sách chính sách
 $query = "SELECT * FROM chinhsach";
 $result = mysqli_query($conn, $query);
 
 // Xử lý thêm chính sách
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
-    if (!in_array('Thêm chính sách', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
-        echo "<script>alert('Bạn không có quyền thêm chính sách!'); window.location.href='index_ad.php?rule';</script>";
-        exit();
-    }
     $ten = mysqli_real_escape_string($conn, $_POST['ten']);
     $noiDung = mysqli_real_escape_string($conn, $_POST['noiDung']);
     if (empty($ten) || empty($noiDung)) {
@@ -47,11 +27,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
 
 // Xử lý cập nhật chính sách
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
-    if (!in_array('Sửa chính sách', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
-        echo "<script>alert('Bạn không có quyền sửa chính sách!'); window.location.href='index_ad.php?rule';</script>";
-        exit();
-    }
-
     $maChinhSach = intval($_POST['maChinhSach']);
     $ten = mysqli_real_escape_string($conn, $_POST['ten']);
     $noiDung = mysqli_real_escape_string($conn, $_POST['noiDung']);
@@ -70,11 +45,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
 
 // Xử lý xóa chính sách
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
-    if (!in_array('Xóa chính sách', $currentPermissions) && (!isset($_SESSION['maRole']) || $_SESSION['maRole'] != 1)) {
-        echo "<script>alert('Bạn không có quyền xóa chính sách!'); window.location.href='index_ad.php?rule';</script>";
-        exit();
-    }
-
     $maChinhSach = intval($_POST['maChinhSach']);
     $query = "DELETE FROM chinhsach WHERE maChinhSach = $maChinhSach";
     if (mysqli_query($conn, $query)) {
@@ -158,11 +128,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
 
                     <div class="card-body px-0 pb-2">
                         <div class="table-responsive p-3" align="right">
-                            <?php if (in_array('Thêm chính sách', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)): ?>
-                                <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addModal">
-                                    <i class="fa fa-add"></i> Thêm mới
-                                </button>
-                            <?php endif; ?>
+
+                            <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addModal">
+                                <i class="fa fa-add"></i> Thêm mới
+                            </button>
+
                             <table class="table align-items-center mb-0">
                                 <thead>
                                     <tr class="text-center">
@@ -187,24 +157,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
                                                     <td class='text-start'><h6>{$row['ten']}</h6></td>
                                                     <td class='text-start text-wrap policy-content'>{$shortContent}</td>
                                                     <td>";
-                                            if (in_array('Sửa chính sách', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)) {
-                                                echo "<a data-toggle='modal' data-target='#editModal' 
+
+                                            echo "<a data-toggle='modal' data-target='#editModal' 
                                                         class='btn btn-warning edit-btn btn-icon' 
                                                         data-id='" . $row['maChinhSach'] . "' 
                                                         data-ten='" . htmlspecialchars($row['ten']) . "' 
                                                         data-noidung='" . htmlspecialchars($row['noiDung']) . "'>
                                                         <i class='fa fa-edit'></i>
                                                       </a>";
-                                            }
-                                            if (in_array('Xóa chính sách', $currentPermissions) || (isset($_SESSION['maRole']) && $_SESSION['maRole'] == 1)) {
-                                                echo "<form method='POST' style='display:inline;'>
+
+
+                                            echo "<form method='POST' style='display:inline;'>
                                                         <input type='hidden' name='maChinhSach' value='" . $row['maChinhSach'] . "'>
                                                         <button type='submit' name='delete' class='btn btn-danger btn-icon' 
                                                                 onclick='return confirm(\"Bạn có chắc chắn muốn xóa Chính sách này?\");'>
                                                             <i class='fa fa-trash'></i>
                                                         </button>
                                                       </form>";
-                                            }
+
                                             echo "</td>
                                                 </tr>";
                                         }
